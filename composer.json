@@ -1,9 +1,9 @@
 {
-    "name": "luistar15/Lustra",
+    "name": "luistar15/lustra",
     "type": "library",
     "description": "PHP minimalistic framework",
     "keywords": ["micro", "minimalistic", "framework"],
-    "homepage": "https://github.com/luistar15/Lustra",
+    "homepage": "https://github.com/luistar15/lustra",
     "license": "MIT",
     "authors": [
         {
