@@ -14,7 +14,7 @@ class App {
 	protected $container;
 	protected $router;
 
-	private $template_dir = './templates';
+	private $template_dir = './';
 
 	public $route;
 
