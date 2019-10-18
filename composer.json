@@ -1,0 +1,23 @@
+{
+    "name": "luistar15/Lustra",
+    "type": "library",
+    "description": "PHP minimalistic framework",
+    "keywords": ["micro", "minimalistic", "framework"],
+    "homepage": "https://github.com/luistar15/Lustra",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Luis Tar Quince",
+            "email": "luistar15@hotmail.com",
+            "homepage": "https://github.com/luistar15"
+        }
+    ],
+    "require": {
+        "php" : "~7.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lustra\\": "src\\Lustra"
+        }
+    }
+}
