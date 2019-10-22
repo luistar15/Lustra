@@ -50,8 +50,15 @@ final class RouterFactory {
 				$route['controller_class'] .= $controller_suffix;
 			}
 
+			$route['controller'] = $route['controller_class'] . '@' . $route['controller_method'];
+
 			$route_methods = $route['methods'] ?? null;
-			unset($route['methods']);
+
+			unset(
+				$route['controller_class'],
+				$route['controller_method'],
+				$route['methods']
+			);
 
 			$router->addRoute($route_id, $route, $route_methods);
 		}

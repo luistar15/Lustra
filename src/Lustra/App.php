@@ -40,8 +40,7 @@ class App {
 
 
 	public function loadController () : void {
-		$class = $this->route['controller_class'];
-		$method = $this->route['controller_method'];
+		[$class, $method] = explode('@', $this->route['controller']);
 
 		$controller = $this->instantiateService($class);
 
