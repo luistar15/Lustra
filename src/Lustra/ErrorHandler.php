@@ -35,6 +35,7 @@ class ErrorHandler {
 	public function register () : void {
 		set_error_handler([$this, 'handleError']);
 		set_exception_handler([$this, 'handleException']);
+		register_shutdown_function([$this, 'handleShutdown']);
 	}
 
 
@@ -68,6 +69,20 @@ class ErrorHandler {
 
 		} else {
 			header('HTTP/1.1 500 Internal Server Error', true);
+		}
+	}
+
+
+	public function handleShutdown () : void {
+		$error = error_get_last();
+
+		if ($error) {
+			$this->handleError(
+				E_ERROR,
+				$error['message'],
+				$error['file'],
+				$error['line']
+			);
 		}
 	}
 
