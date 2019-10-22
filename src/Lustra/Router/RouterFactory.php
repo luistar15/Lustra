@@ -76,8 +76,6 @@ final class RouterFactory {
 
 	) : array {
 
-		$constraints = array_merge(self::CONSTRAINTS, $constraints);
-
 		$routes = self::flattenTree(self::fixTree($routes));
 
 		foreach ($routes as $route_id => $route) {
@@ -94,6 +92,8 @@ final class RouterFactory {
 		array &$rules
 
 	) : array {
+
+		$constraints = array_merge(self::CONSTRAINTS, $constraints);
 
 		$parameters_placeholders = [];
 		$template_placeholders   = [];
@@ -190,18 +190,21 @@ final class RouterFactory {
 				if (isset($node['controller_class'])) {
 					$controller_class = [$node['controller_class']];
 
+				} else if ($is_group || !$has_parent) {
+					$controller_class = [str_replace('_', '', ucwords($node_id, '_'))];
+
 				} else {
-					if ($is_group || !$has_parent) {
-						$controller_class = [str_replace('_', '', ucwords($node_id, '_'))];
-					} else {
-						$controller_class = [];
-					}
+					$controller_class = [];
 				}
 
 				if (isset($node['controller_method'])) {
 					$controller_method = $node['controller_method'];
-				} else if (!$is_group) {
-					$controller_method = $has_parent ? $node_id : '__invoke';
+
+				} else if (!$is_group && $has_parent && !isset($node['controller_class'])) {
+					$controller_method = $node_id;
+
+				} else {
+					$controller_method = '__invoke';
 				}
 
 				// methods --------------------------------------------------
