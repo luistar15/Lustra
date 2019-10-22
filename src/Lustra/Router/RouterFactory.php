@@ -76,7 +76,7 @@ final class RouterFactory {
 
 	) : array {
 
-		$routes = self::flattenTree(self::fixTree($routes));
+		$routes = self::flattenRoutesTree(self::fixRoutesTree($routes));
 
 		foreach ($routes as $route_id => $route) {
 			$routes[$route_id] = array_merge($route, self::parsePath($route['path'], $constraints, $rules));
@@ -162,7 +162,7 @@ final class RouterFactory {
 	}
 
 
-	private static function fixTree (array $tree) : array {
+	public static function fixRoutesTree (array $tree) : array {
 		$walker = function (array $nodes, bool $has_parent) use (&$walker) {
 			$fixed = [];
 
@@ -239,7 +239,7 @@ final class RouterFactory {
 	}
 
 
-	private static function flattenTree (array $tree) : array {
+	public static function flattenRoutesTree (array $tree) : array {
 		$flatten = [];
 
 		$flattener = function (array $nodes) use (&$flattener) : iterable {
