@@ -19,6 +19,7 @@ final class RouterFactory {
 		string $path_prefix,
 		string $source_file,
 		string $cache_file = null,
+		bool   $use_cache = true,
 		string $controller_namespace = null,
 		string $controller_suffix = null
 
@@ -26,7 +27,9 @@ final class RouterFactory {
 
 		$router = new Router($path_prefix);
 
-		if ($cache_file && is_file($cache_file)) {
+		$cache_file_exists = $cache_file && is_file($cache_file);
+
+		if ($use_cache && $cache_file_exists) {
 			$router->import(require $cache_file);
 			return $router;
 		}
@@ -65,11 +68,16 @@ final class RouterFactory {
 
 		// --------------
 
-		if ($cache_file) {
-			file_put_contents(
-				$cache_file,
-				sprintf("<?php return %s;\n", var_export($router->export(), true))
-			);
+		if ($cache_file && !$cache_file_exists) {
+			$data = var_export($router->export(), true);
+
+			// unnecesary dummy format
+			$data = str_replace('  ', "\t", $data);                              // spaces to tabs
+			$data = preg_replace("/=>\s*\n\t*(array\s*\()/m", '=> ${1}', $data); // same line '=> array'
+			$data = str_replace('array (', '[', $data);                          // array() -> []
+			$data = preg_replace('/(\n\t*)\)(,|$)/', '${1}]${2}', $data);
+
+			file_put_contents($cache_file, sprintf("<?php return %s;\n", $data));
 		}
 
 		return $router;
@@ -229,8 +237,8 @@ final class RouterFactory {
 				// ensamble ----------------------------------------------------
 
 				$node = [
-					'path'              => $path,
-					'controller_class'  => $controller_class,
+					'path'             => $path,
+					'controller_class' => $controller_class,
 				];
 
 				if ($is_group) {
