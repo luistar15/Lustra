@@ -138,7 +138,7 @@ final class RouterFactory {
 			$regexp_delimiter = '#';
 
 			// build path template
-			$path_tpl = strtr($path_regexp, $template_placeholders);
+			$path = strtr($path_regexp, $template_placeholders);
 
 
 			// change optional blocks format
@@ -163,9 +163,13 @@ final class RouterFactory {
 
 			// build regex
 			$path_regexp = sprintf('%s^%s$%s', $regexp_delimiter, $path_regexp, $regexp_delimiter);
+
+
+			// --
+			return compact('path', 'path_regexp');
 		}
 
-		return isset($path_tpl) ? compact('path_regexp', 'path_tpl') : [];
+		return [];
 	}
 
 

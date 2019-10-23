@@ -76,12 +76,13 @@ class Router {
 	) : string {
 
 		$route = $this->routes[$route_id];
+		$path  = $route['path'];
 
-		if (isset($route['path_tpl'])) {
-			// fill parameters
+		if (isset($route['path_regexp'])) {
+			// replace parameters values
 			if ($parameters && count($parameters) > 0) {
 				$placeholders = array_map(function ($k) { return "{{$k}}"; }, array_keys($parameters));
-				$path = str_replace($placeholders, array_values($parameters), $route['path_tpl']);
+				$path = str_replace($placeholders, array_values($parameters), $route['path']);
 			}
 
 			// clear optional parameters
@@ -89,8 +90,6 @@ class Router {
 				return preg_match('/{.*}/', $matches[1]) ? '' : $matches[1];
 			}, $path);
 
-		} else {
-			$path = $route['path'];
 		}
 
 		return $path;
