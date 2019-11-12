@@ -2,9 +2,13 @@
 
 namespace Lustra;
 
+use Closure;
 use InvalidArgumentException;
+
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
 
 use Lustra\Router\Router;
 
@@ -14,23 +18,24 @@ class App {
 	protected $container;
 	protected $router;
 
-	private $template_dir = './';
+	private $template_dir = '.';
 
 	public $route;
 
 
 	public function __construct (
-		Container $container,
-		Router    $router
+		Router    $router,
+		Container $container
 	) {
 
+		$this->router    = $router;
 		$this->container = $container;
-		$this->router = $router;
 	}
 
 
 	public function run () : void {
-		$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+		$path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		$method = $_SERVER['REQUEST_METHOD'];
 
 		$this->route = $this->router->findMatch($path, $method);
@@ -40,23 +45,33 @@ class App {
 
 
 	public function loadController () : void {
-		[$class, $method] = explode('@', $this->route['controller']);
 
-		$controller = $this->instantiateService($class);
+		$controller = $this->route['controller'];
 
-		$method_reflection = new ReflectionMethod($class, $method);
-		$method_arguments = $this->findServiceArguments($method_reflection, true);
+		// clousure
+		if ($controller instanceof Closure) {
+			$arguments = $this->findServiceArguments(new ReflectionFunction($controller), true);
+			$controller(...$arguments);
 
-		$controller->{$method}(...$method_arguments);
+		// class
+		} else {
+			[$class, $method] = explode('@', $controller);
+
+			$arguments = $this->findServiceArguments(new ReflectionMethod($class, $method), true);
+
+			$controller = $this->instantiateService($class);
+			$controller->{$method}(...$arguments);
+		}
 	}
 
 
 	public function instantiateService (string $class) {
+
 		$reflection = new ReflectionClass($class);
 		$constructor = $reflection->getConstructor();
 
 		if ($constructor) {
-			$arguments = $this->findServiceArguments($constructor);
+			$arguments = $this->findServiceArguments($constructor, false);
 			return new $class(...$arguments);
 		} else {
 			return new $class();
@@ -65,37 +80,37 @@ class App {
 
 
 	public function findServiceArguments (
-		ReflectionMethod $method,
+		ReflectionFunctionAbstract $function,
 		bool $include_route_parameters = false
 
 	) : array {
 
 		$args = [];
 
-		$parameters = $method->getParameters();
+		$parameters = $function->getParameters();
 
 		foreach ($parameters as $parameter) {
-			$name  = $parameter->getName();
-			$class = $parameter->getClass();
+			$arg       = null;
+			$arg_name  = $parameter->getName();
+			$arg_class = $parameter->getClass();
 
-			$arg = null;
 			$found = false;
 
-			if ($class) {
-				$class = $class->getName();
+			if ($arg_class) {
+				$arg_class = $arg_class->getName();
 
-				if ($this instanceof $class) {
+				if ($this instanceof $arg_class) {
 					$arg = $this;
 					$found = true;
 
-				} else if ($this->container->has($class)) {
-					$arg = $this->container->get($class);
+				} else if ($this->container->has($arg_class)) {
+					$arg = $this->container->get($arg_class);
 					$found = true;
 				}
 
 			} else if ($include_route_parameters && $parameter->getType()->getName() == 'string') {
-				if (isset($this->route['parameters'][$name])) {
-					$arg = $this->route['parameters'][$name];
+				if (isset($this->route['parameters'][$arg_name])) {
+					$arg = $this->route['parameters'][$arg_name];
 					$found = true;
 				}
 			}
@@ -111,12 +126,17 @@ class App {
 			} else if ($parameter->isOptional()) {
 				break;
 
+			} else if ($function instanceof ReflectionMethod){
+				throw new InvalidArgumentException(sprintf(
+					"'{$arg_name}' argument was not found for: %s->%s()",
+					$function->getDeclaringClass()->getName(),
+					$function->getName()
+				));
+
 			} else {
 				throw new InvalidArgumentException(sprintf(
-					"'%s' argument was not found for: %s->%s()",
-					$name,
-					$method->getDeclaringClass()->getName(),
-					$method->getName()
+					"'{$arg_name}' argument was not found for: %s()",
+					$function->getName()
 				));
 			}
 		}

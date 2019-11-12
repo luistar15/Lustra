@@ -5,16 +5,6 @@ namespace Lustra\Router;
 
 final class RouterFactory {
 
-	const CONSTRAINTS = [
-		'digit' => '\d+',
-		'alpha' => '[a-z]+',
-		'alnum' => '\w+',
-		'text'  => '[^/]+',
-		'date'  => '\d{4}-\d{2}-\d{2}',
-		'any'   => '.+',
-	];
-
-
 	public static function build (
 		string $path_prefix,
 		string $source_file,
@@ -34,39 +24,38 @@ final class RouterFactory {
 			return $router;
 		}
 
-		// --------------
+		// ------------------------------------------
 
 		$source = require $source_file;
 
-		$routes = self::parseRoutes(
-			$source['routes'],
-			$source['constraints'] ?? [],
-			$source['rules'] ?? []
-		);
+		$routes_requirements = $source['requirements'] ?? [];
+		$routes_constraints  = $source['constraints']  ?? [];
 
-		foreach ($routes as $route_id => $route) {
+		$routes = self::flattenRoutesTree(self::fixRoutesTree($source['routes']));
+
+		foreach ($routes as $route_name => $route) {
+			$controller_class  = $route['controller_class'];
+			$controller_method = $route['controller_method'];
+
 			if ($controller_namespace) {
-				$route['controller_class'] = $controller_namespace . '\\' . $route['controller_class'];
+				$controller_class = "{$controller_namespace}\\{$controller_class}";
 			}
 
 			if ($controller_suffix) {
-				$route['controller_class'] .= $controller_suffix;
+				$controller_class .= $controller_suffix;
 			}
 
-			$route['controller'] = $route['controller_class'] . '@' . $route['controller_method'];
+			$route_controller = "{$controller_class}@{$controller_method}";
 
-			$route_methods = $route['methods'] ?? null;
-
-			unset(
-				$route['controller_class'],
-				$route['controller_method'],
-				$route['methods']
-			);
-
-			$router->addRoute($route_id, $route, $route_methods);
+			$router->addRoute($route['path'], $route_controller, [
+				'name'         => $route_name,
+				'methods'      => $route['methods'],
+				'requirements' => $routes_requirements,
+				'constraints'  => $routes_constraints,
+			]);
 		}
 
-		// --------------
+		// ------------------------------------------
 
 		if ($cache_file && !$cache_file_exists) {
 			$data = var_export($router->export(), true);
@@ -74,115 +63,21 @@ final class RouterFactory {
 			// unnecesary dummy format
 			$data = str_replace('  ', "\t", $data);                              // spaces to tabs
 			$data = preg_replace("/=>\s*\n\t*(array\s*\()/m", '=> ${1}', $data); // same line '=> array'
-			$data = str_replace('array (', '[', $data);                          // array() -> []
+			$data = preg_replace("/(\t)\d+ => /", '${1}', $data);                // remove numeric index
+			$data = str_replace('array (', '[', $data);                          // array() to []
 			$data = preg_replace('/(\n\t*)\)(,|$)/', '${1}]${2}', $data);
 
-			file_put_contents($cache_file, sprintf("<?php return %s;\n", $data));
+			file_put_contents($cache_file, "<?php return {$data};\n");
 		}
 
 		return $router;
 	}
 
 
-	public static function parseRoutes (
-		array $routes,
-		array $constraints,
-		array $rules
-
-	) : array {
-
-		$routes = self::flattenRoutesTree(self::fixRoutesTree($routes));
-
-		foreach ($routes as $route_id => $route) {
-			$routes[$route_id] = array_merge($route, self::parsePath($route['path'], $constraints, $rules));
-		}
-
-		return $routes;
-	}
-
-
-	public static function parsePath (
-		string $path,
-		array &$constraints,
-		array &$rules
-
-	) : array {
-
-		$constraints = array_merge(self::CONSTRAINTS, $constraints);
-
-		$parameters_placeholders = [];
-		$template_placeholders   = [];
-
-		// extract parameters
-		$path_regexp = preg_replace_callback('/{(?<name>\w+)(:(?<constraint>[^}]+))?}/', function (
-			$matches
-		) use (
-			&$parameters_placeholders,
-			&$template_placeholders,
-			&$constraints,
-			&$rules
-		) {
-
-			$k = sprintf("`%s`", count($parameters_placeholders));
-			$n = $matches['name'];
-			$c = $matches['constraint'] ?? null;
-
-			if ($c) {
-				$regex = $constraints[$c] ?? $c;
-			} else if (isset($rules[$n])) {
-				$regex = $constraints[$rules[$n]] ?? $rules[$n];
-			} else {
-				$regex = $constraints['text'];
-			}
-
-			$parameters_placeholders[$k] = sprintf('(?<%s>%s)', $n, $regex);
-			$template_placeholders[$k]   = sprintf('{%s}', $n);
-
-			return $k;
-		}, $path);
-
-
-		if (count($parameters_placeholders) > 0) {
-			$regexp_delimiter = '#';
-
-			// build path template
-			$path = strtr($path_regexp, $template_placeholders);
-
-
-			// change optional blocks format
-			$path_regexp = preg_replace_callback('/\[([^\]]+)\]/', function ($matches) {
-				return sprintf('~%s~', $matches[1]);
-			}, $path_regexp);
-
-
-			// escape regex chars
-			$path_regexp = preg_quote($path_regexp, $regexp_delimiter);
-
-
-			// restore parsed parameters
-			$path_regexp = strtr($path_regexp, $parameters_placeholders);
-
-
-			// fix optional blocks
-			$path_regexp = preg_replace_callback("/~([^~]+)~/", function ($matches) {
-				return sprintf('(?|%s)?', $matches[1]);
-			}, $path_regexp);
-
-
-			// build regex
-			$path_regexp = sprintf('%s^%s$%s', $regexp_delimiter, $path_regexp, $regexp_delimiter);
-
-
-			// --
-			return compact('path', 'path_regexp');
-		}
-
-		return [];
-	}
-
-
 	public static function fixRoutesTree (array $tree) : array {
+
 		$walker = function (array $nodes, bool $has_parent) use (&$walker) {
+
 			$fixed = [];
 
 			foreach ($nodes as $node_id => $node) {
@@ -226,7 +121,7 @@ final class RouterFactory {
 					$controller_method = '__invoke';
 				}
 
-				// methods --------------------------------------------------
+				// methods -----------------------------------------------------
 
 				if (isset($node['methods'])) {
 					$methods = $node['methods'];
@@ -259,6 +154,7 @@ final class RouterFactory {
 
 
 	public static function flattenRoutesTree (array $tree) : array {
+
 		$flatten = [];
 
 		$flattener = function (array $nodes) use (&$flattener) : iterable {
@@ -277,11 +173,11 @@ final class RouterFactory {
 			}
 		};
 
-		foreach ($flattener($tree) as $route_id => $route) {
+		foreach ($flattener($tree) as $route_name => $route) {
 			$route['path']             = implode('/', $route['path']);
 			$route['controller_class'] = implode('\\', $route['controller_class']);
 
-			$flatten[$route_id] = $route;
+			$flatten[$route_name] = $route;
 		}
 
 		return $flatten;
