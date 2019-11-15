@@ -76,7 +76,16 @@ final class RouterFactory {
 
 	public static function fixRoutesTree (array $tree) : array {
 
-		$walker = function (array $nodes, bool $has_parent) use (&$walker) {
+		$CamelCase = function ($str) {
+			return strtr(ucwords(preg_replace('/[^a-z0-9]+/i', ' ', strtolower($str))), [' ' => '']);
+		};
+
+		$lowerCamelCase = function ($str) use (&$CamelCase) {
+			$str = $CamelCase($str);
+			return strtolower(substr($str, 0, 1)) . substr($str, 1);
+		};
+
+		$walker = function (array $nodes, bool $has_parent) use (&$walker, &$CamelCase, &$lowerCamelCase) {
 
 			$fixed = [];
 
@@ -105,7 +114,7 @@ final class RouterFactory {
 					$controller_class = [$node['controller_class']];
 
 				} else if ($is_group || !$has_parent) {
-					$controller_class = [str_replace('_', '', ucwords($node_id, '_'))];
+					$controller_class = [$CamelCase($node_id)];
 
 				} else {
 					$controller_class = [];
@@ -115,7 +124,7 @@ final class RouterFactory {
 					$controller_method = $node['controller_method'];
 
 				} else if (!$is_group && $has_parent && !isset($node['controller_class'])) {
-					$controller_method = $node_id;
+					$controller_method = $lowerCamelCase($node_id);
 
 				} else {
 					$controller_method = '__invoke';
