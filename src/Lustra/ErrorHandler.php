@@ -88,7 +88,9 @@ class ErrorHandler {
 
 
 	private static function dumpException (Throwable $exception) : void {
-		ob_clean();
+		if (ob_get_length()) {
+			ob_clean();
+		}
 
 		header('HTTP/1.1 500 Internal Server Error', true);
 		header('Content-Type: text/plain; charset=UTF-8', true);
