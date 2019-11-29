@@ -88,40 +88,52 @@ class ErrorHandler {
 
 
 	private static function dumpException (Throwable $exception) : void {
-		if (ob_get_length()) {
-			ob_clean();
-		}
-
-		header('HTTP/1.1 500 Internal Server Error', true);
-		header('Content-Type: text/plain; charset=UTF-8', true);
-
-		printf("* %s\n", $exception->getMessage());
-		printf("  %s (%s)\n\n", $exception->getFile(), $exception->getLine());
+		$html = sprintf(
+			"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
+			htmlspecialchars(get_class($exception)),
+			htmlspecialchars(trim($exception->getMessage())),
+			htmlspecialchars($exception->getFile()),
+			htmlspecialchars($exception->getLine())
+		);
 
 		foreach ($exception->getTrace() as $entry) {
-			$caller = '';
-			$location = null;
-
-			if (isset($entry['file'])) {
-				$location = sprintf('%s (%s)', $entry['file'], $entry['line']);
-			}
+			$caller   = '';
+			$location = '';
 
 			if (isset($entry['class'])) {
 				$caller .= $entry['class'] . $entry['type'];
 			}
 
 			if (isset($entry['function'])) {
-				$caller .= $entry['function'];
+				$caller .= $entry['function'] . '()';
 			}
 
-			$caller .= '()';
-
-			if ($location) {
-				printf("- %s\n  %s\n\n", $caller, $location);
-			} else {
-				printf("- %s\n\n", $caller);
+			if (isset($entry['file'])) {
+				$location = sprintf(" <br>\n<code>%s (%s)</code>", htmlspecialchars($entry['file']), $entry['line']);
 			}
+
+			$html .= sprintf("<div><b>%s</b>{$location}</div><br>\n\n", htmlspecialchars($caller));
 		}
+
+		// -----------------------------
+
+		if (ob_get_length()) {
+			ob_clean();
+		}
+
+		header('HTTP/1.1 500 Internal Server Error', true);
+		header('Content-Type: text/html; charset=UTF-8', true);
+
+		echo <<<HTML
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title>An error has occurred</title>
+			<style>html { font-family: "Segoe UI", Verdana, sans-serif; }</style>
+		</head>
+		<body>{$html}</body>
+		</html>
+		HTML;
 
 		exit;
 	}
