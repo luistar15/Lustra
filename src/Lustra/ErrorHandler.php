@@ -62,7 +62,17 @@ class ErrorHandler {
 
 	public function handleException (Throwable $exception) : void {
 		if ($this->debug) {
-			self::dumpException($exception);
+			if (ob_get_length()) {
+				ob_clean();
+			}
+
+			if (PHP_SAPI === 'cli') {
+				self::dumpExceptionCli($exception);
+			} else {
+				self::dumpExceptionHtml($exception);
+			}
+
+			exit;
 
 		} else if ($this->handler) {
 			call_user_func($this->handler, $exception);
@@ -87,13 +97,13 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpException (Throwable $exception) : void {
+	private static function dumpExceptionHtml (Throwable $exception) : void {
 		$html = sprintf(
 			"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
 			htmlspecialchars(get_class($exception)),
 			htmlspecialchars(trim($exception->getMessage())),
 			htmlspecialchars($exception->getFile()),
-			htmlspecialchars($exception->getLine())
+			$exception->getLine()
 		);
 
 		foreach ($exception->getTrace() as $entry) {
@@ -117,10 +127,6 @@ class ErrorHandler {
 
 		// -----------------------------
 
-		if (ob_get_length()) {
-			ob_clean();
-		}
-
 		header('HTTP/1.1 500 Internal Server Error', true);
 		header('Content-Type: text/html; charset=UTF-8', true);
 
@@ -134,8 +140,38 @@ class ErrorHandler {
 		<body>{$html}</body>
 		</html>
 		HTML;
+	}
 
-		exit;
+
+	private static function dumpExceptionCli (Throwable $exception) : void {
+		$color = function ($str, $color) { return "\e[{$color}m{$str}\e[0m"; };
+
+		printf(
+			"\n%s\n%s\n%s (%s)\n\n",
+			$color(get_class($exception), 41),
+			$color(trim($exception->getMessage()), 36),
+			$exception->getFile(),
+			$exception->getLine()
+		);
+
+		foreach ($exception->getTrace() as $entry) {
+			$caller   = '';
+			$location = '';
+
+			if (isset($entry['class'])) {
+				$caller .= $entry['class'] . $entry['type'];
+			}
+
+			if (isset($entry['function'])) {
+				$caller .= $entry['function'] . '()';
+			}
+
+			if (isset($entry['file'])) {
+				$location = sprintf("\n%s (%s)", $entry['file'], $entry['line']);
+			}
+
+			printf("%s{$location}\n\n", $color($caller, 31));
+		}
 	}
 
 }
