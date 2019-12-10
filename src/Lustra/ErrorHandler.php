@@ -144,7 +144,7 @@ class ErrorHandler {
 
 
 	private static function dumpExceptionCli (Throwable $exception) : void {
-		$color = function ($str, $color) { return "\e[{$color}m{$str}\e[0m"; };
+		$color = function ($str, $code) { return "\e[{$code}m{$str}\e[0m"; };
 
 		printf(
 			"\n%s\n%s\n%s (%s)\n\n",
