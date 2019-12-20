@@ -76,7 +76,7 @@ abstract class ActiveRecord {
 
 		$query = array_merge($query, ['LIMIT' => '1']);
 
-		$rows = $this->find($query, $bindings, true);
+		$rows = $this->find($query, $bindings);
 
 		if (count($rows) === 0) {
 			throw new RecordNotFoundException(
@@ -97,7 +97,7 @@ abstract class ActiveRecord {
 	) : array {
 
 		return $this->load(
-			['WHERE' => "`{$column}` = :_VAL_" ],
+			['WHERE' => "`{$column}` = :_VAL_"],
 			[':_VAL_' => $value]
 		);
 	}
@@ -144,7 +144,7 @@ abstract class ActiveRecord {
 		$query = array_merge($query, ['FROM' => $this->__table]);
 
 		if (isset($query['JOIN'])) {
-			$query['JOIN'] = SQLBuilder::parseJoins($query['JOIN'], $this->__relations);
+			$query['JOIN'] = SQLBuilder::parseJoins((array) $query['JOIN'], $this->__relations);
 		}
 
 		return $this->__db->getRows(SQLBuilder::build($query), $bindings);

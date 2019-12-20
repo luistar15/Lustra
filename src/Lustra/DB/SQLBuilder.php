@@ -26,7 +26,7 @@ class SQLBuilder {
 		$sql = ['SELECT'];
 
 		foreach ($query as $k => $v) {
-			if (!in_array($k, ['DISTINCT', 'FROM', 'LIMIT']) && is_string($v)) {
+			if (is_string($v) && !in_array($k, ['DISTINCT', 'FROM', 'LIMIT'])) {
 				$v = [$v];
 			}
 

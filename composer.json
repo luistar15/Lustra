@@ -1,23 +1,30 @@
 {
-    "name": "luistar15/lustra",
-    "type": "library",
-    "description": "PHP minimalistic framework",
-    "keywords": ["micro", "minimalistic", "framework"],
-    "homepage": "https://github.com/luistar15/lustra",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Luis Tar Quince",
-            "email": "luistar15@hotmail.com",
-            "homepage": "https://github.com/luistar15"
-        }
-    ],
-    "require": {
-        "php" : "~7.3"
-    },
-    "autoload": {
-        "psr-4": {
-            "Lustra\\": "src\\Lustra"
-        }
-    }
+	"name": "luistar15/lustra",
+	"type": "library",
+	"description": "PHP minimalistic framework",
+	"keywords": ["micro", "minimalistic", "framework"],
+	"homepage": "https://github.com/luistar15/lustra",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Luis Tar Quince",
+			"email": "luistar15@hotmail.com",
+			"homepage": "https://github.com/luistar15"
+		}
+	],
+	"require": {
+		"php" : "~7.3"
+	},
+	"require-dev": {
+		"phpunit/phpunit" : "^8",
+		"phan/phan": "^2.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"Lustra\\": "src\\Lustra"
+		}
+	},
+	"scripts": {
+		"analyze": "phan --config-file ./.phan/config.php"
+	}
 }

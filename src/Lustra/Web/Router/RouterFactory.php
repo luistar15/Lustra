@@ -1,6 +1,6 @@
 <?php
 
-namespace Lustra\Router;
+namespace Lustra\Web\Router;
 
 
 final class RouterFactory {

@@ -1,16 +1,18 @@
 <?php
 
-namespace Lustra;
+namespace Lustra\Web;
 
-use Closure;
-use InvalidArgumentException;
+
+use Lustra\Web\Router\Router;
+use Lustra\Container;
 
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 
-use Lustra\Router\Router;
+use Closure;
+use InvalidArgumentException;
 
 
 class App {
