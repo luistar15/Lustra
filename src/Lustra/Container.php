@@ -3,10 +3,12 @@
 namespace Lustra;
 
 
+use Exception;
+
+
 class Container {
 
 	private $store = [];
-
 	private $builders = [];
 
 
@@ -35,7 +37,7 @@ class Container {
 			return $this->store[$k];
 		}
 
-		throw new ContainerException("'{$k}' not found in container");
+		throw new Exception("'{$k}' not found in container");
 	}
 
 
@@ -44,6 +46,3 @@ class Container {
 	}
 
 }
-
-
-class ContainerException extends \Exception {};
