@@ -11,12 +11,31 @@ class Validator {
 	 * ]);
 	 */
 
-	 public static function validate (
+	public static function validate (
 		array $source,
 		array $rules,
-		array $types = [],
-		bool  $return_parsed = false
-	) {
+		array $types = []
+
+	) : bool {
+
+		$valid = true;
+
+		try {
+			self::parse($source, $rules, $types);
+		} catch (ValidatorException $e) {
+			$valid = false;
+		}
+
+		return $valid;
+	}
+
+
+	public static function parse (
+		array $source,
+		array $rules,
+		array $types = []
+
+	) : array {
 
 		$parsed = [];
 
@@ -51,29 +70,13 @@ class Validator {
 					'required' => $required
 				]);
 
-				if ($return_parsed) {
-					throw $error;
-				} else {
-					return $error;
-				}
-
-			} else if ($return_parsed) {
-				$parsed[$k] = $missing ? $default : $value;
+				throw $error;
 			}
+
+			$parsed[$k] = $missing ? $default : $value;
 		}
 
-		return $return_parsed ? $parsed : true;
-	}
-
-
-	public static function parse (
-		array $source,
-		array $rules,
-		array $types = []
-
-	) : array {
-
-		return self::validate($source, $rules, $types, true);
+		return $parsed;
 	}
 
 
@@ -85,11 +88,11 @@ class Validator {
 	) : bool {
 
 		if (isset(self::$types[$type])) {
-			return preg_match(self::$types[$type], $value);
+			return (bool) preg_match(self::$types[$type], $value);
 		}
 
 		if (isset($types[$type])) {
-			return preg_match($types[$type], $value);
+			return (bool) preg_match($types[$type], $value);
 		}
 
 		if (in_array($type, ['DOMAIN', 'EMAIL', 'IP', 'MAC', 'URL'])) {
@@ -104,7 +107,7 @@ class Validator {
 	}
 
 
-	private static $types = [
+	private static array $types = [
 		'BOOL'     => '/^[01]$/',
 		'DATE'     => '/^\d{4}-\d{2}-\d{2}$/',
 		'DATETIME' => '/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/',

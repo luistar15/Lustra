@@ -5,10 +5,10 @@ namespace Lustra\Web\Router;
 
 class Router {
 
-	private $path_prefix;
+	private string $path_prefix;
 
-	private $routes = [];
-	private $routes_methods = [];
+	private array $routes = [];
+	private array $routes_methods = [];
 
 	const REQUIREMENTS = [
 		'digit' => '\d+',
@@ -24,6 +24,8 @@ class Router {
 		$this->path_prefix = $path_prefix;
 	}
 
+
+	/** @param string|callable $controller */
 
 	public function addRoute (
 		string $path,

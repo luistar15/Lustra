@@ -5,12 +5,12 @@ namespace Lustra\DB;
 
 abstract class ActiveRecord {
 
-	protected $__db;
+	protected DBAL $__db;
 
-	protected $__table     = '<table>';
-	protected $__pk        = 'id';
-	protected $__relations = [];
-	protected $__data      = [];
+	protected string $__table     = '<table>';
+	protected string $__pk        = 'id';
+	protected array  $__relations = [];
+	protected array  $__data      = [];
 
 
 	public function __construct (DBAL $db) {
@@ -18,12 +18,16 @@ abstract class ActiveRecord {
 	}
 
 
-	public function __set ($k, $v) {
+	/** @param string|int|float|bool|null $v */
+
+	public function __set (string $k, $v) : void {
 		$this->__data[$k] = $v;
 	}
 
 
-	public function __get ($k) {
+	/** @return string|int|float|bool|null */
+
+	public function __get (string $k) {
 		return $this->__data[$k] ?? null;
 	}
 
@@ -111,7 +115,7 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function save (array $columns = []) {
+	public function save (array $columns = []) : void {
 		$data = $this->getData($columns);
 
 		if ($this->exists()) {
@@ -123,7 +127,7 @@ abstract class ActiveRecord {
 	}
 
 
-	public function delete () {
+	public function delete () : void {
 		$this->__db->delete(
 			$this->__table,
 			['WHERE' => sprintf("`%s` = :pk", $this->__pk)],
@@ -147,7 +151,11 @@ abstract class ActiveRecord {
 			$query['JOIN'] = SQLBuilder::parseJoins((array) $query['JOIN'], $this->__relations);
 		}
 
-		return $this->__db->getRows(SQLBuilder::build($query), $bindings);
+		$rows = $this->__db->getRows(SQLBuilder::build($query), $bindings);
+
+		if (is_array($rows)) {
+			return $rows;
+		}
 	}
 
 

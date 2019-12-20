@@ -9,9 +9,9 @@ use Lustra\Validator\ValidatorException;
 
 class Arguments {
 
-	private $params;
-	private $rules;
-	private $types;
+	private array $params;
+	private array $rules;
+	private array $types;
 
 
 	/*
@@ -105,6 +105,10 @@ class Arguments {
 			}
 		}
 
+		// ---------
+
+		$data = [];
+
 		try {
 			$data = Validator::parse($parsed, $this->rules, $this->types);
 
@@ -113,8 +117,6 @@ class Arguments {
 					$data[$k] = !!$data[$k];
 				}
 			}
-
-			return $data;
 
 		} catch (ValidatorException $e) {
 
@@ -142,6 +144,8 @@ class Arguments {
 
 			$this->displayUsageError($error_message);
 		}
+
+		return $data;
 	}
 
 

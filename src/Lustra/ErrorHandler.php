@@ -5,13 +5,14 @@ namespace Lustra;
 
 use Throwable;
 use ErrorException;
-
+use phpDocumentor\Reflection\Types\Callable_;
 
 class ErrorHandler {
 
-	private $debug = true;
+	private bool $debug = true;
 
-	private $handler = null; // custom user handler
+	/** @var callable|null */
+	private $handler = null;
 
 
 	public function __construct (
@@ -24,7 +25,7 @@ class ErrorHandler {
 	}
 
 
-	private function setup (string $error_log) {
+	private function setup (string $error_log) : void {
 		ini_set('display_errors', $this->debug ? '1' : '0');
 		ini_set('log_errors', $this->debug ? '0' : '1');
 		ini_set('error_log', $error_log);

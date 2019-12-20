@@ -8,8 +8,8 @@ use Exception;
 
 class Container {
 
-	private $store = [];
-	private $builders = [];
+	private array $store = [];
+	private array $builders = [];
 
 
 	public function has (string $k) : bool {
@@ -17,6 +17,8 @@ class Container {
 		       array_key_exists($k, $this->builders);
 	}
 
+
+	/** @param mixed $v */
 
 	public function add (string $k, $v) : void {
 		if (is_callable($v)) {
@@ -26,6 +28,8 @@ class Container {
 		}
 	}
 
+
+	/** @return mixed */
 
 	public function get (string $k) {
 		if (array_key_exists($k, $this->store)) {
@@ -40,6 +44,8 @@ class Container {
 		throw new Exception("'{$k}' not found in container");
 	}
 
+
+	/** @return mixed */
 
 	public function build (string $k) {
 		return $this->builders[$k]($this);

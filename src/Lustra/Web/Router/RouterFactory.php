@@ -132,6 +132,8 @@ final class RouterFactory {
 
 				// methods -----------------------------------------------------
 
+				$methods = [];
+
 				if (isset($node['methods'])) {
 					$methods = $node['methods'];
 				} else if (!$is_group) {

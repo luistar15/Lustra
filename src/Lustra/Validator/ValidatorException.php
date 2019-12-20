@@ -12,7 +12,7 @@ class ValidatorException extends Exception {
 	const MISSING_VALUE = 1;
 	const INVALID_VALUE = 2;
 
-	private $data = [];
+	private array $data = [];
 
 
 	public static function build (

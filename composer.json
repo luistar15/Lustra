@@ -13,11 +13,12 @@
 		}
 	],
 	"require": {
-		"php" : "~7.3"
+		"php" : "~7.4"
 	},
 	"require-dev": {
 		"phpunit/phpunit" : "^8",
-		"phan/phan": "^2.4"
+		"phan/phan": "^2.4",
+		"phpstan/phpstan": "^0.12"
 	},
 	"autoload": {
 		"psr-4": {
@@ -25,6 +26,7 @@
 		}
 	},
 	"scripts": {
-		"analyze": "phan --config-file ./.phan/config.php"
+		"analyze-phan": "phan --config-file ./.phan/config.php",
+		"analyze-phpstan": "phpstan analyze -l 7 -c ./.phpstan/config.neon src"
 	}
 }

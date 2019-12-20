@@ -17,12 +17,13 @@ use InvalidArgumentException;
 
 class App {
 
-	protected $container;
-	protected $router;
+	protected Container $container;
 
-	private $template_dir = '.';
+	protected Router $router;
 
-	public $route;
+	private string $template_dir = '.';
+
+	public array $route;
 
 
 	public function __construct (
@@ -40,9 +41,10 @@ class App {
 		$path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		$method = $_SERVER['REQUEST_METHOD'];
 
-		$this->route = $this->router->findMatch($path, $method);
-
-		$this->loadController();
+		if (is_string($path)) {
+			$this->route = $this->router->findMatch($path, $method);
+			$this->loadController();
+		}
 	}
 
 
@@ -66,6 +68,8 @@ class App {
 		}
 	}
 
+
+	/** @return object */
 
 	public function instantiateService (string $class) {
 
@@ -110,11 +114,13 @@ class App {
 					$found = true;
 				}
 
-			} else if ($include_route_parameters && $parameter->getType()->getName() == 'string') {
-				if (isset($this->route['parameters'][$arg_name])) {
-					$arg = $this->route['parameters'][$arg_name];
-					$found = true;
-				}
+			} else if (
+				$include_route_parameters &&
+				$parameter->getType()->getName() === 'string' &&
+				isset($this->route['parameters'][$arg_name])
+			) {
+				$arg = $this->route['parameters'][$arg_name];
+				$found = true;
 			}
 
 			if (!$found && $parameter->isDefaultValueAvailable()) {

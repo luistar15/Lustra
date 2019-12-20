@@ -11,9 +11,9 @@ use Exception;
 
 class DBAL extends PDO {
 
-	private $connection_parameters;
+	private array $connection_parameters;
 
-	private $is_connected = false;
+	private bool $is_connected = false;
 
 
 	public function __construct (
@@ -68,11 +68,15 @@ class DBAL extends PDO {
 		array  $bindings = [],
 		int    $fetch_type = PDO::FETCH_ASSOC
 
-	) {
+	) : array {
 
 		$sth = $this->execute($sql, $bindings);
 		$rows = $sth->fetchAll($fetch_type);
 		$sth->closeCursor();
+
+		if ($rows === false) {
+			throw new Exception('PDOStatement::fetchAll() has failed');
+		}
 
 		return $rows;
 	}
@@ -82,11 +86,16 @@ class DBAL extends PDO {
 		string $sql,
 		array  $bindings = [],
 		int    $fetch_type = PDO::FETCH_ASSOC
-	) {
+
+	) : array {
 
 		$sth = $this->execute($sql, $bindings);
 		$row = $sth->fetch($fetch_type);
 		$sth->closeCursor();
+
+		if ($row === false) {
+			throw new Exception('PDOStatement::fetch() has failed');
+		}
 
 		return $row;
 	}
@@ -97,11 +106,15 @@ class DBAL extends PDO {
 		array  $bindings = [],
 		int    $column_number = 0
 
-	) {
+	) : array {
 
 		$sth = $this->execute($sql, $bindings);
 		$column = $sth->fetchAll(PDO::FETCH_COLUMN, $column_number);
 		$sth->closeCursor();
+
+		if ($column === false) {
+			throw new Exception('PDOStatement::fetchAll(PDO::FETCH_COLUMN) has failed');
+		}
 
 		return $column;
 	}
@@ -111,13 +124,18 @@ class DBAL extends PDO {
 		string $sql,
 		array  $bindings = [],
 		int    $column_number = 0
-	) {
+
+	) : string {
 
 		$sth = $this->execute($sql, $bindings);
-		$cell = $sth->fetchColumn($column_number);
+		$val = $sth->fetchColumn($column_number);
 		$sth->closeCursor();
 
-		return $cell;
+		if ($val === false) {
+			throw new Exception('PDOStatement::fetchColumn() has failed');
+		}
+
+		return $val;
 	}
 
 
