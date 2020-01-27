@@ -5,7 +5,7 @@ namespace Lustra;
 
 use Throwable;
 use ErrorException;
-use phpDocumentor\Reflection\Types\Callable_;
+
 
 class ErrorHandler {
 

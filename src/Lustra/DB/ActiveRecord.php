@@ -94,7 +94,7 @@ abstract class ActiveRecord {
 	}
 
 
-	public function loadBy (
+	public function loadByColumn (
 		string $column,
 		string $value
 
@@ -108,7 +108,7 @@ abstract class ActiveRecord {
 
 
 	public function loadByPk (string $pk) : array {
-		return $this->loadBy($this->__pk, $pk);
+		return $this->loadByColumn($this->__pk, $pk);
 	}
 
 
