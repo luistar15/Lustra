@@ -158,8 +158,13 @@ class App {
 	}
 
 
-	public function template (string $path) : string {
-		return $this->template_dir . "/{$path}.tpl";
+	public function template (
+		string $path,
+		string $ext = 'phtml'
+
+	) : string {
+
+		return $this->template_dir . "/{$path}.{$ext}";
 	}
 
 
