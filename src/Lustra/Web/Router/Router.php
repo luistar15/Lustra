@@ -13,6 +13,7 @@ class Router {
 	const REQUIREMENTS = [
 		'digit' => '\d+',
 		'alpha' => '[a-z]+',
+		'slug'  => '[a-z-]+',
 		'alnum' => '\w+',
 		'text'  => '[^/]+',
 		'date'  => '\d{4}-\d{2}-\d{2}',
