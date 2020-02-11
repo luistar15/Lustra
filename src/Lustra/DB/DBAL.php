@@ -125,7 +125,7 @@ class DBAL extends PDO {
 		array  $bindings = [],
 		int    $column_number = 0
 
-	) : string {
+	) : ?string {
 
 		$sth = $this->execute($sql, $bindings);
 		$val = $sth->fetchColumn($column_number);
