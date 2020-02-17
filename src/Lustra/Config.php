@@ -78,12 +78,12 @@ class Config {
 
 	private static function replacePlaceholdersInValue (
 		string $value,
-		array $placeholders
+		 array $placeholders
 
 	) : string {
 
 		$value = str_replace(
-			array_map(fn ($k) => "{$k}", array_keys($placeholders)),
+			array_map(fn ($k) => '{'.$k.'}', array_keys($placeholders)),
 			array_values($placeholders),
 			$value
 		);
