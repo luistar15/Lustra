@@ -4,15 +4,20 @@ namespace Lustra;
 
 use Exception;
 
+
 class Config {
 
 	private array $config = [];
 
 
 	public function loadIniFile (string $file) : void {
-		$this->config = array_replace_recursive($this->config,
-			parse_ini_file($file, true, INI_SCANNER_TYPED),
-		);
+		$data = parse_ini_file($file, true, INI_SCANNER_TYPED);
+
+		if ($data === false) {
+			throw new Exception("Error parsing ini file: {$file}");
+		}
+
+		$this->config = array_replace_recursive($this->config, $data);
 	}
 
 
