@@ -9,32 +9,35 @@ use ErrorException;
 
 class ErrorHandler {
 
-	private bool $debug = true;
+	private bool $debug;
 
 	/** @var callable|null */
 	private $handler = null;
 
 
-	public function __construct (
-		bool   $debug = true,
-		string $error_log = ''
-	) {
-
-		$this->debug = $debug;
-		$this->setup($error_log);
+	public function __construct () {
+		$this->setup(true);
+		$this->register();
 	}
 
 
-	private function setup (string $error_log) : void {
-		ini_set('display_errors', $this->debug ? '1' : '0');
-		ini_set('log_errors', $this->debug ? '0' : '1');
+	public function setup (
+		  bool $debug,
+		string $error_log = ''
+
+	) : void {
+
+		$this->debug = $debug;
+
+		ini_set('display_errors', $debug ? '1' : '0');
+		ini_set('log_errors', $debug ? '0' : '1');
 		ini_set('error_log', $error_log);
 
 		error_reporting(E_ALL);
 	}
 
 
-	public function register () : void {
+	private function register () : void {
 		set_error_handler([$this, 'handleError']);
 		set_exception_handler([$this, 'handleException']);
 		register_shutdown_function([$this, 'handleShutdown']);
