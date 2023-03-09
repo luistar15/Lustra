@@ -10,6 +10,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
+use ReflectionParameter;
 
 use Closure;
 use InvalidArgumentException;
@@ -98,7 +99,7 @@ class App {
 		foreach ($parameters as $parameter) {
 			$arg       = null;
 			$arg_name  = $parameter->getName();
-			$arg_class = $parameter->getClass();
+			$arg_class = $this->getReflectionClass($parameter);
 
 			$found = false;
 
@@ -150,6 +151,21 @@ class App {
 		}
 
 		return $args;
+	}
+
+
+	private function getReflectionClass(ReflectionParameter $parameter) : ?ReflectionClass {
+		$type = $parameter->getType();
+
+		if (!$type || $type->isBuiltin()) {
+			return null;
+		}
+
+		if (!class_exists($type->getName())) {
+			return null;
+		}
+
+		return new ReflectionClass($type->getName());
 	}
 
 
