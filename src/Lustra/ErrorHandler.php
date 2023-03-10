@@ -29,8 +29,8 @@ class ErrorHandler {
 
 		$this->debug = $debug;
 
-		ini_set('display_errors', $debug ? '1' : '0');
-		ini_set('log_errors', $debug ? '0' : '1');
+		ini_set('display_errors', $debug);
+		ini_set('log_errors', !$debug);
 		ini_set('error_log', $error_log);
 
 		error_reporting(E_ALL);
