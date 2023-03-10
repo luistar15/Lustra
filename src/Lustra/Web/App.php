@@ -34,6 +34,8 @@ class App {
 
 		$this->router    = $router;
 		$this->container = $container;
+
+		$container->add(Router::class, $router);
 	}
 
 
