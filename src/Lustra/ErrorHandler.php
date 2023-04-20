@@ -116,14 +116,14 @@ class ErrorHandler {
 			$location = '';
 
 			if (isset($entry['class'])) {
-				$caller .= $entry['class'] . $entry['type'];
+				$caller .= $entry['class'] . ($entry['type'] ?? '');
 			}
 
-			if (isset($entry['function'])) {
+			if ($entry['function']) {
 				$caller .= $entry['function'] . '()';
 			}
 
-			if (isset($entry['file'])) {
+			if (isset($entry['file'], $entry['line'])) {
 				$location = sprintf(" <br>\n<code>%s (%s)</code>", htmlspecialchars($entry['file']), $entry['line']);
 			}
 
@@ -164,14 +164,14 @@ class ErrorHandler {
 			$location = '';
 
 			if (isset($entry['class'])) {
-				$caller .= $entry['class'] . $entry['type'];
+				$caller .= $entry['class'] . ($entry['type'] ?? '');
 			}
 
-			if (isset($entry['function'])) {
+			if ($entry['function']) {
 				$caller .= $entry['function'] . '()';
 			}
 
-			if (isset($entry['file'])) {
+			if (isset($entry['file'], $entry['line'])) {
 				$location = sprintf("\n%s (%s)", $entry['file'], $entry['line']);
 			}
 

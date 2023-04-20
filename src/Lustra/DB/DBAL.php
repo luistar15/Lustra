@@ -34,7 +34,9 @@ class DBAL extends PDO {
 			return;
 		}
 
-		parent::__construct(...$this->connection_parameters);
+		[$dsn, $username, $passwd, $options] = $this->connection_parameters;
+
+		parent::__construct($dsn, $username, $passwd, $options);
 
 		$this->is_connected = true;
 	}
@@ -74,10 +76,6 @@ class DBAL extends PDO {
 		$rows = $sth->fetchAll($fetch_type);
 		$sth->closeCursor();
 
-		if ($rows === false) {
-			throw new Exception('PDOStatement::fetchAll() has failed');
-		}
-
 		return $rows;
 	}
 
@@ -112,10 +110,6 @@ class DBAL extends PDO {
 		$column = $sth->fetchAll(PDO::FETCH_COLUMN, $column_number);
 		$sth->closeCursor();
 
-		if ($column === false) {
-			throw new Exception('PDOStatement::fetchAll(PDO::FETCH_COLUMN) has failed');
-		}
-
 		return $column;
 	}
 
@@ -135,7 +129,7 @@ class DBAL extends PDO {
 			throw new Exception('PDOStatement::fetchColumn() has failed');
 		}
 
-		return $val;
+		return strval($val);
 	}
 
 

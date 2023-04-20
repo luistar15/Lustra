@@ -18,16 +18,12 @@ abstract class ActiveRecord {
 	}
 
 
-	/** @param string|int|float|bool|null $v */
-
-	public function __set (string $k, $v) : void {
+	public function __set (string $k, string|int|float|bool|null $v) : void {
 		$this->__data[$k] = $v;
 	}
 
 
-	/** @return string|int|float|bool|null */
-
-	public function __get (string $k) {
+	public function __get (string $k) : string|int|float|bool|null {
 		return $this->__data[$k] ?? null;
 	}
 
@@ -120,9 +116,15 @@ abstract class ActiveRecord {
 
 		if ($this->exists()) {
 			$this->__db->update($this->__table, $data);
+
 		} else {
 			$this->__db->insert($this->__table, $data);
-			$this->setPk($this->__db->lastInsertId());
+
+			$insert_id = $this->__db->lastInsertId();
+
+			if ( is_string( $insert_id ) ) {
+				$this->setPk( $insert_id );
+			}
 		}
 	}
 

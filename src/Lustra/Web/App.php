@@ -11,10 +11,11 @@ use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
+use ReflectionNamedType;
 
 use Closure;
 use InvalidArgumentException;
-
+use ReflectionType;
 
 class App {
 
@@ -75,6 +76,11 @@ class App {
 	/** @return object */
 
 	public function instantiateService (string $class) {
+		if ( ! class_exists($class) ) {
+			throw new InvalidArgumentException(
+				"'{$class}' argument is not a valid ClassName",
+			);
+		}
 
 		$reflection = new ReflectionClass($class);
 		$constructor = $reflection->getConstructor();
@@ -101,6 +107,7 @@ class App {
 		foreach ($parameters as $parameter) {
 			$arg       = null;
 			$arg_name  = $parameter->getName();
+			$arg_type  = $parameter->getType();
 			$arg_class = $this->getReflectionClass($parameter);
 
 			$found = false;
@@ -119,7 +126,8 @@ class App {
 
 			} else if (
 				$include_route_parameters &&
-				$parameter->getType()->getName() === 'string' &&
+				$arg_type instanceof ReflectionNamedType &&
+				$arg_type->getName() === 'string' &&
 				isset($this->route['parameters'][$arg_name])
 			) {
 				$arg = $this->route['parameters'][$arg_name];
@@ -159,7 +167,15 @@ class App {
 	private function getReflectionClass(ReflectionParameter $parameter) : ?ReflectionClass {
 		$type = $parameter->getType();
 
-		if (!$type || $type->isBuiltin()) {
+		if (is_null($type)) {
+			return null;
+		}
+
+		if (!($type instanceof ReflectionNamedType)) {
+			return null;
+		}
+
+		if ($type->isBuiltin()) {
 			return null;
 		}
 

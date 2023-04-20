@@ -111,7 +111,7 @@ class Router {
 
 		if (isset($route['path_regexp'])) {
 			// replace parameters values
-			if ($parameters && count($parameters) > 0) {
+			if (is_array($parameters) && count($parameters) > 0) {
 				$placeholders = array_map(function ($k) { return "{{$k}}"; }, array_keys($parameters));
 				$path = str_replace($placeholders, array_values($parameters), $route['path']);
 			}
@@ -140,7 +140,7 @@ class Router {
 			$url = $this->path_prefix . $url;
 		}
 
-		if ($getvars && count($getvars) > 0) {
+		if (is_array($getvars) && count($getvars) > 0) {
 			$url .= '?' . http_build_query($getvars);
 		}
 
