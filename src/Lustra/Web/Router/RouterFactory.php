@@ -7,15 +7,15 @@ final class RouterFactory {
 	public static function build(
 		string $path_prefix,
 		string $source_file,
-		string $cache_file = null,
+		string $cache_file,
 		bool $use_cache = true,
-		string $controller_namespace = null,
-		string $controller_suffix = null
+		string $controller_namespace = 'Site\\Controller',
+		string $controller_suffix = 'Controller'
 	): Router {
 
 		$router = new Router($path_prefix);
 
-		$cache_file_exists = $cache_file && is_file($cache_file);
+		$cache_file_exists = is_file($cache_file);
 
 		if ($use_cache && $cache_file_exists) {
 			$router->import(require $cache_file);
@@ -55,7 +55,7 @@ final class RouterFactory {
 
 		// ------------------------------------------
 
-		if ($cache_file && !$cache_file_exists) {
+		if (!$cache_file_exists) {
 			$data = var_export($router->export(), true);
 
 			// unnecesary dummy format
