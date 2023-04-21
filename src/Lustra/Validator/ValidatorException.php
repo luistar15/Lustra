@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Lustra\Validator;
 
+
 use Exception;
+
 
 class ValidatorException extends Exception {
 
@@ -21,14 +23,14 @@ class ValidatorException extends Exception {
 		array $data = []
 	): self {
 
-		$e = new self($message, $code);
-		$e->setData($data);
+		$e = new self( $message, $code );
+		$e->setData( $data );
 
 		return $e;
 	}
 
 
-	public function setData(array $data): void {
+	public function setData( array $data ): void {
 		$this->data = $data;
 	}
 

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Lustra\Web;
 
+
 use Lustra\Web\Router\Router;
 use Lustra\Container;
+
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
@@ -14,6 +16,7 @@ use ReflectionParameter;
 use ReflectionNamedType;
 use Closure;
 use InvalidArgumentException;
+
 
 class App {
 
@@ -34,17 +37,17 @@ class App {
 		$this->router    = $router;
 		$this->container = $container;
 
-		$container->add(Router::class, $router);
+		$container->add( Router::class, $router );
 	}
 
 
 	public function run(): void {
 
-		$path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		$path   = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		$method = $_SERVER['REQUEST_METHOD'];
 
-		if (is_string($path)) {
-			$this->route = $this->router->findMatch($path, $method);
+		if ( is_string( $path ) ) {
+			$this->route = $this->router->findMatch( $path, $method );
 			$this->loadController();
 		}
 	}
@@ -55,35 +58,35 @@ class App {
 		$controller = $this->route['controller'];
 
 		// clousure
-		if ($controller instanceof Closure) {
-			$arguments = $this->findServiceArguments(new ReflectionFunction($controller), true);
-			$controller(...$arguments);
+		if ( $controller instanceof Closure ) {
+			$arguments = $this->findServiceArguments( new ReflectionFunction( $controller ), true );
+			$controller( ...$arguments );
 
-		// class
+			// class
 		} else {
-			[$class, $method] = explode('@', $controller);
+			[ $class, $method ] = explode( '@', $controller );
 
-			$arguments = $this->findServiceArguments(new ReflectionMethod($class, $method), true);
+			$arguments = $this->findServiceArguments( new ReflectionMethod( $class, $method ), true );
 
-			$controller = $this->instantiateService($class);
-			$controller->{$method}(...$arguments);
+			$controller = $this->instantiateService( $class );
+			$controller->{$method}( ...$arguments );
 		}
 	}
 
 
-	public function instantiateService(string $class): object {
-		if (! class_exists($class)) {
+	public function instantiateService( string $class ): object {
+		if ( ! class_exists( $class ) ) {
 			throw new InvalidArgumentException(
 				"'{$class}' argument is not a valid ClassName",
 			);
 		}
 
-		$reflection  = new ReflectionClass($class);
+		$reflection  = new ReflectionClass( $class );
 		$constructor = $reflection->getConstructor();
 
-		if ($constructor) {
-			$arguments = $this->findServiceArguments($constructor, false);
-			return new $class(...$arguments);
+		if ( $constructor ) {
+			$arguments = $this->findServiceArguments( $constructor, false );
+			return new $class( ...$arguments );
 		} else {
 			return new $class();
 		}
@@ -99,59 +102,63 @@ class App {
 
 		$parameters = $function->getParameters();
 
-		foreach ($parameters as $parameter) {
+		foreach ( $parameters as $parameter ) {
 			$arg       = null;
 			$arg_name  = $parameter->getName();
 			$arg_type  = $parameter->getType();
-			$arg_class = $this->getReflectionClass($parameter);
+			$arg_class = $this->getReflectionClass( $parameter );
 
 			$found = false;
 
-			if ($arg_class) {
+			if ( $arg_class ) {
 				$arg_class = $arg_class->getName();
 
-				if ($this instanceof $arg_class) {
+				if ( $this instanceof $arg_class ) {
 					$arg   = $this;
 					$found = true;
 
-				} elseif ($this->container->has($arg_class)) {
-					$arg   = $this->container->get($arg_class);
+				} else if ( $this->container->has( $arg_class ) ) {
+					$arg   = $this->container->get( $arg_class );
 					$found = true;
 				}
 
-			} elseif (
+			} else if (
 				$include_route_parameters &&
 				$arg_type instanceof ReflectionNamedType &&
 				$arg_type->getName() === 'string' &&
-				isset($this->route['parameters'][$arg_name])
+				isset( $this->route['parameters'][ $arg_name ] )
 			) {
-				$arg   = $this->route['parameters'][$arg_name];
+				$arg   = $this->route['parameters'][ $arg_name ];
 				$found = true;
 			}
 
-			if (!$found && $parameter->isDefaultValueAvailable()) {
+			if ( ! $found && $parameter->isDefaultValueAvailable() ) {
 				$arg   = $parameter->getDefaultValue();
 				$found = true;
 			}
 
-			if ($found) {
+			if ( $found ) {
 				$args[] = $arg;
 
-			} elseif ($parameter->isOptional()) {
+			} else if ( $parameter->isOptional() ) {
 				break;
 
-			} elseif ($function instanceof ReflectionMethod) {
-				throw new InvalidArgumentException(sprintf(
-					"'{$arg_name}' argument was not found for: %s->%s()",
-					$function->getDeclaringClass()->getName(),
-					$function->getName()
-				));
+			} else if ( $function instanceof ReflectionMethod ) {
+				throw new InvalidArgumentException(
+					sprintf(
+						"'{$arg_name}' argument was not found for: %s->%s()",
+						$function->getDeclaringClass()->getName(),
+						$function->getName()
+					)
+				);
 
 			} else {
-				throw new InvalidArgumentException(sprintf(
-					"'{$arg_name}' argument was not found for: %s()",
-					$function->getName()
-				));
+				throw new InvalidArgumentException(
+					sprintf(
+						"'{$arg_name}' argument was not found for: %s()",
+						$function->getName()
+					)
+				);
 			}
 		}
 
@@ -159,30 +166,30 @@ class App {
 	}
 
 
-	private function getReflectionClass(ReflectionParameter $parameter): ?ReflectionClass {
+	private function getReflectionClass( ReflectionParameter $parameter ): ?ReflectionClass {
 		$type = $parameter->getType();
 
-		if (is_null($type)) {
+		if ( is_null( $type ) ) {
 			return null;
 		}
 
-		if (!($type instanceof ReflectionNamedType)) {
+		if ( ! ( $type instanceof ReflectionNamedType ) ) {
 			return null;
 		}
 
-		if ($type->isBuiltin()) {
+		if ( $type->isBuiltin() ) {
 			return null;
 		}
 
-		if (!class_exists($type->getName())) {
+		if ( ! class_exists( $type->getName() ) ) {
 			return null;
 		}
 
-		return new ReflectionClass($type->getName());
+		return new ReflectionClass( $type->getName() );
 	}
 
 
-	public function setTemplateDir(string $path): void {
+	public function setTemplateDir( string $path ): void {
 		$this->template_dir = $path;
 	}
 
@@ -201,12 +208,12 @@ class App {
 		array &$data = null
 	): void {
 
-		if ($data) {
-			extract($data, EXTR_REFS);
+		if ( $data ) {
+			extract( $data, EXTR_REFS ); // phpcs:ignore
 		}
 
 		ob_start();
-		require $this->template($path);
+		require $this->template( $path );
 		ob_end_flush();
 	}
 
@@ -216,7 +223,7 @@ class App {
 		int $code = 302
 	): void {
 
-		header("Location: {$url}", true, $code);
+		header( "Location: {$url}", true, $code );
 		exit;
 	}
 

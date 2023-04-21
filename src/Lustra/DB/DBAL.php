@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Lustra\DB;
 
+
 use PDO;
 use PDOStatement;
 use Iterator;
 use Exception;
+
 
 class DBAL extends PDO {
 
@@ -23,20 +25,20 @@ class DBAL extends PDO {
 		array $options = []
 	) {
 
-		$options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
+		$options[ PDO::ATTR_ERRMODE ] = PDO::ERRMODE_EXCEPTION;
 
-		$this->connection_parameters = [$dsn, $username, $passwd, $options];
+		$this->connection_parameters = [ $dsn, $username, $passwd, $options ];
 	}
 
 
 	public function connect(): void {
-		if ($this->is_connected) {
+		if ( $this->is_connected ) {
 			return;
 		}
 
-		[$dsn, $username, $passwd, $options] = $this->connection_parameters;
+		[ $dsn, $username, $passwd, $options ] = $this->connection_parameters;
 
-		parent::__construct($dsn, $username, $passwd, $options);
+		parent::__construct( $dsn, $username, $passwd, $options );
 
 		$this->is_connected = true;
 	}
@@ -49,9 +51,9 @@ class DBAL extends PDO {
 
 		$this->connect();
 
-		$sth = $this->prepare($sql);
+		$sth = $this->prepare( $sql );
 
-		self::bindValues($sth, $bindings);
+		self::bindValues( $sth, $bindings );
 
 		$sth->execute();
 
@@ -70,8 +72,8 @@ class DBAL extends PDO {
 		int $fetch_type = PDO::FETCH_ASSOC
 	): array {
 
-		$sth  = $this->execute($sql, $bindings);
-		$rows = $sth->fetchAll($fetch_type);
+		$sth  = $this->execute( $sql, $bindings );
+		$rows = $sth->fetchAll( $fetch_type );
 		$sth->closeCursor();
 
 		return $rows;
@@ -84,12 +86,12 @@ class DBAL extends PDO {
 		int $fetch_type = PDO::FETCH_ASSOC
 	): array {
 
-		$sth = $this->execute($sql, $bindings);
-		$row = $sth->fetch($fetch_type);
+		$sth = $this->execute( $sql, $bindings );
+		$row = $sth->fetch( $fetch_type );
 		$sth->closeCursor();
 
-		if ($row === false) {
-			throw new Exception('PDOStatement::fetch() has failed');
+		if ( $row === false ) {
+			throw new Exception( 'PDOStatement::fetch() has failed' );
 		}
 
 		return $row;
@@ -102,8 +104,8 @@ class DBAL extends PDO {
 		int $column_number = 0
 	): array {
 
-		$sth    = $this->execute($sql, $bindings);
-		$column = $sth->fetchAll(PDO::FETCH_COLUMN, $column_number);
+		$sth    = $this->execute( $sql, $bindings );
+		$column = $sth->fetchAll( PDO::FETCH_COLUMN, $column_number );
 		$sth->closeCursor();
 
 		return $column;
@@ -116,15 +118,15 @@ class DBAL extends PDO {
 		int $column_number = 0
 	): ?string {
 
-		$sth = $this->execute($sql, $bindings);
-		$val = $sth->fetchColumn($column_number);
+		$sth = $this->execute( $sql, $bindings );
+		$val = $sth->fetchColumn( $column_number );
 		$sth->closeCursor();
 
-		if ($val === false) {
-			throw new Exception('PDOStatement::fetchColumn() has failed');
+		if ( $val === false ) {
+			throw new Exception( 'PDOStatement::fetchColumn() has failed' );
 		}
 
-		return strval($val);
+		return strval( $val );
 	}
 
 
@@ -137,9 +139,9 @@ class DBAL extends PDO {
 		int $fetch_type = PDO::FETCH_ASSOC
 	): Iterator {
 
-		$sth = $this->execute($sql, $bindings);
+		$sth = $this->execute( $sql, $bindings );
 
-		while ($row = $sth->fetch($fetch_type)) {
+		while ( $row = $sth->fetch( $fetch_type ) ) { // phpcs:ignore
 			yield $row;
 		}
 
@@ -153,9 +155,9 @@ class DBAL extends PDO {
 		int $column_number = 0
 	): Iterator {
 
-		$sth = $this->execute($sql, $bindings);
+		$sth = $this->execute( $sql, $bindings );
 
-		while ($cell = $sth->fetchColumn($column_number)) {
+		while ( $cell = $sth->fetchColumn( $column_number ) ) { // phpcs:ignore
 			yield $cell;
 		}
 
@@ -177,7 +179,7 @@ class DBAL extends PDO {
 		$placehoders = [];
 		$bindings    = [];
 
-		foreach ($data as $k => $v) {
+		foreach ( $data as $k => $v ) {
 			$columns[]     = $k;
 			$placehoders[] = '?';
 			$bindings[]    = $v;
@@ -185,11 +187,11 @@ class DBAL extends PDO {
 
 		$sql = sprintf(
 			"INSERT INTO {$table} (%s) VALUES (%s)",
-			implode(', ', $columns),
-			implode(', ', $placehoders)
+			implode( ', ', $columns ),
+			implode( ', ', $placehoders )
 		);
 
-		$sth = $this->execute($sql, $bindings);
+		$sth = $this->execute( $sql, $bindings );
 
 		return $sth->rowCount();
 	}
@@ -209,19 +211,19 @@ class DBAL extends PDO {
 
 		$columns = [];
 
-		foreach ($data as $k => $v) {
-			$columns[]         = "{$k} = :{$k}";
-			$bindings[":{$k}"] = $v;
+		foreach ( $data as $k => $v ) {
+			$columns[]           = "{$k} = :{$k}";
+			$bindings[ ":{$k}" ] = $v;
 		}
 
-		$sql = "UPDATE {$table} SET " . implode(', ', $columns);
+		$sql = "UPDATE {$table} SET " . implode( ', ', $columns );
 
-		if (count($conditions)) {
+		if ( count( $conditions ) ) {
 			$sql .= ' WHERE ';
-			$sql .= implode(' AND ', array_map(fn ($c) => "({$c})", $conditions));
+			$sql .= implode( ' AND ', array_map( fn ( $c) => "({$c})", $conditions ) );
 		}
 
-		$sth = $this->execute($sql, $bindings);
+		$sth = $this->execute( $sql, $bindings );
 
 		return $sth->rowCount();
 	}
@@ -240,12 +242,12 @@ class DBAL extends PDO {
 
 		$sql = "DELETE FROM {$table}";
 
-		if (count($conditions)) {
+		if ( count( $conditions ) ) {
 			$sql .= ' WHERE ';
-			$sql .= implode(' AND ', array_map(fn ($c) => "({$c})", $conditions));
+			$sql .= implode( ' AND ', array_map( fn ( $c) => "({$c})", $conditions ) );
 		}
 
-		$sth = $this->execute($sql, $bindings);
+		$sth = $this->execute( $sql, $bindings );
 
 		return $sth->rowCount();
 	}
@@ -256,13 +258,13 @@ class DBAL extends PDO {
 	// ------------------------------------------------------------------------------
 
 
-	public static function getStatementColumns(PDOStatement $sth): array {
+	public static function getStatementColumns( PDOStatement $sth ): array {
 		$columns = [];
 
 		$count = $sth->columnCount();
 
-		for ($i = 0; $i < $count; $i++) {
-			$columns[] = $sth->getColumnMeta($i);
+		for ( $i = 0; $i < $count; $i++ ) {
+			$columns[] = $sth->getColumnMeta( $i );
 		}
 
 		return $columns;
@@ -276,41 +278,37 @@ class DBAL extends PDO {
 
 		$question_mark_position = 0;
 
-		foreach ($bindings as $k => $v) {
-			$parameter = is_int($k) ? ++$question_mark_position : $k;
+		foreach ( $bindings as $k => $v ) {
+			$parameter = is_int( $k ) ? ++$question_mark_position : $k;
 
 			$value     = $v;
 			$data_type = null;
 
-			if (is_array($v)) {
+			if ( is_array( $v ) ) {
 				$value     = $v[0];
 				$data_type = $v[1] ?? null;
 			}
 
-			if (is_null($data_type)) {
-				$data_type = self::inferDataType(gettype($value));
+			if ( is_null( $data_type ) ) {
+				$data_type = self::inferDataType( gettype( $value ) );
 			}
 
-			$sth->bindValue($parameter, $value, $data_type);
+			$sth->bindValue( $parameter, $value, $data_type );
 		}
 	}
 
 
-	private static function inferDataType(string $type): int {
-		switch ($type) {
-			case 'string':
-				return PDO:: PARAM_STR;
-			case 'integer':
-				return PDO:: PARAM_INT;
-			case 'boolean':
-				return PDO:: PARAM_BOOL;
-			case 'double':
-				return PDO:: PARAM_STR;
-			case 'NULL':
-				return PDO:: PARAM_NULL;
+	private static function inferDataType( string $type ): int {
+		// phpcs:disable
+		switch ( $type ) {
+			case 'string'  : return PDO::PARAM_STR;
+			case 'integer' : return PDO::PARAM_INT;
+			case 'boolean' : return PDO::PARAM_BOOL;
+			case 'double'  : return PDO::PARAM_STR;
+			case 'NULL'    : return PDO::PARAM_NULL;
 
 			default:
-				throw new Exception("Invalid PDO data type: {$type}");
+				throw new Exception( "Invalid PDO data type: {$type}" );
 		}
 	}
 

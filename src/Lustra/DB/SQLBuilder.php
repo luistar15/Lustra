@@ -4,73 +4,78 @@ declare(strict_types=1);
 
 namespace Lustra\DB;
 
+
 use Exception;
+
 
 class SQLBuilder {
 
-	public static function build(array $query): string {
+	public static function build( array $query ): string {
 
-		$query = array_merge([
-			'DISTINCT' => false,
-			'COLUMNS'  => ['*'],
-			'FROM'     => '<table>',
-			'JOIN'     => [],
-			'WHERE'    => [],
-			'GROUP'    => [],
-			'HAVING'   => [],
-			'ORDER'    => [],
-			'LIMIT'    => null,
-		], $query);
+		$query = array_merge(
+			[
+				'DISTINCT' => false,
+				'COLUMNS'  => [ '*' ],
+				'FROM'     => '<table>',
+				'JOIN'     => [],
+				'WHERE'    => [],
+				'GROUP'    => [],
+				'HAVING'   => [],
+				'ORDER'    => [],
+				'LIMIT'    => null,
+			],
+			$query
+		);
 
 
-		$sql = ['SELECT'];
+		$sql = [ 'SELECT' ];
 
-		foreach ($query as $k => $v) {
-			if (is_string($v) && !in_array($k, ['DISTINCT', 'FROM', 'LIMIT'])) {
-				$v = [$v];
+		foreach ( $query as $k => $v ) {
+			if ( is_string( $v ) && ! in_array( $k, [ 'DISTINCT', 'FROM', 'LIMIT' ], true ) ) {
+				$v = [ $v ];
 			}
 
-			switch ($k) {
+			switch ( $k ) {
 				case 'DISTINCT':
-					if ($v) {
+					if ( $v ) {
 						$sql[] = $k;
 					}
 					break;
 
 				case 'COLUMNS':
-					$sql[] = implode(', ', $v);
+					$sql[] = implode( ', ', $v );
 					break;
 
 				case 'FROM':
 				case 'LIMIT':
-					if ($v) {
+					if ( $v ) {
 						$sql[] = "{$k} {$v}";
 					}
 					break;
 
 				case 'JOIN':
-					if (count($v) > 0) {
-						$sql[] = implode(' ', $v);
+					if ( count( $v ) > 0 ) {
+						$sql[] = implode( ' ', $v );
 					}
 					break;
 
 				case 'WHERE':
 				case 'HAVING':
-					if (count($v) > 0) {
-						$sql[] = "{$k} " . implode(' AND ', $v);
+					if ( count( $v ) > 0 ) {
+						$sql[] = "{$k} " . implode( ' AND ', $v );
 					}
 					break;
 
 				case 'GROUP':
 				case 'ORDER':
-					if (count($v) > 0) {
-						$sql[] = "{$k} BY " . implode(', ', $v);
+					if ( count( $v ) > 0 ) {
+						$sql[] = "{$k} BY " . implode( ', ', $v );
 					}
 					break;
 			}
 		}
 
-		return rtrim(implode(' ', $sql));
+		return rtrim( implode( ' ', $sql ) );
 	}
 
 
@@ -81,35 +86,35 @@ class SQLBuilder {
 
 		$parsed = [];
 
-		$joins = array_unique($joins);
+		$joins = array_unique( $joins );
 
-		foreach ($joins as $join) {
-			$join = trim($join);
+		foreach ( $joins as $join ) {
+			$join = trim( $join );
 
-			if (empty($join)) {
+			if ( empty( $join ) ) {
 				continue;
 			}
 
 			$regex = '/^((?<a>INNER|LEFT|RIGTH|FULL)(\s+JOIN)?\s+)?(?<b>\S+)(\s+ON\s+(?<c>.+))?$/i';
 
-			if (!preg_match($regex, $join, $matches)) {
-				throw new Exception("Malformed JOIN clause: '{$join}'");
+			if ( ! preg_match( $regex, $join, $matches ) ) {
+				throw new Exception( "Malformed JOIN clause: '{$join}'" );
 			}
 
 			$type      = $matches['a'] ?: 'INNER';
 			$table     = $matches['b'];
 			$condition = $matches['c'] ?? null;
 
-			if (isset($relations[$table])) {
-				if ($condition) {
-					$condition = "({$relations[$table]}) AND ({$condition})";
+			if ( isset( $relations[ $table ] ) ) {
+				if ( $condition ) {
+					$condition = "({$relations[ $table ]}) AND ({$condition})";
 				} else {
-					$condition = $relations[$table];
+					$condition = $relations[ $table ];
 				}
 			}
 
-			if (empty($condition)) {
-				throw new Exception("Malformed JOIN clause: '{$join}'");
+			if ( empty( $condition ) ) {
+				throw new Exception( "Malformed JOIN clause: '{$join}'" );
 			}
 
 			$parsed[] = "{$type} JOIN {$table} ON {$condition}";

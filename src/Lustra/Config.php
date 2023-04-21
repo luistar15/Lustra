@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace Lustra;
 
+
 use Exception;
+
 
 class Config {
 
 	private array $config = [];
 
 
-	public function loadIniFile(string $file): void {
-		$data = parse_ini_file($file, true, INI_SCANNER_TYPED);
+	public function loadIniFile( string $file ): void {
+		$data = parse_ini_file( $file, true, INI_SCANNER_TYPED );
 
-		if ($data === false) {
-			throw new Exception("Error parsing ini file: {$file}");
+		if ( $data === false ) {
+			throw new Exception( "Error parsing ini file: {$file}" );
 		}
 
-		$this->config = array_replace_recursive($this->config, $data);
+		$this->config = array_replace_recursive( $this->config, $data );
 	}
 
 
@@ -27,8 +29,8 @@ class Config {
 		string $env
 	): void {
 
-		$this->loadIniFile("{$folder}/config.base.ini");
-		$this->loadIniFile("{$folder}/config.{$env}.ini");
+		$this->loadIniFile( "{$folder}/config.base.ini" );
+		$this->loadIniFile( "{$folder}/config.{$env}.ini" );
 	}
 
 
@@ -37,7 +39,7 @@ class Config {
 		string $key
 	): bool {
 
-		return isset($this->config[$section][$key]);
+		return isset( $this->config[ $section ][ $key ] );
 	}
 
 
@@ -48,26 +50,26 @@ class Config {
 		array $placeholders = []
 	): mixed {
 
-		$value = $this->config[$section][$key] ?? $default;
+		$value = $this->config[ $section ][ $key ] ?? $default;
 
-		if (is_null($value)) {
-			throw new Exception(self::class . " [$section][$key] was not found");
+		if ( is_null( $value ) ) {
+			throw new Exception( self::class . " [$section][$key] was not found" );
 		}
 
-		if (count($placeholders) > 0) {
-			$value = self::replacePlaceholdersInValue($value, $placeholders);
+		if ( count( $placeholders ) > 0 ) {
+			$value = self::replacePlaceholdersInValue( $value, $placeholders );
 		}
 
 		return $value;
 	}
 
 
-	public function replacePlaceholders(array $placeholders = []): void {
-		if (count($placeholders) > 0) {
-			foreach ($this->config as $section => $values) {
-				foreach ($values as $k => $v) {
-					if (is_string($v)) {
-						$this->config[$section][$k] = self::replacePlaceholdersInValue($v, $placeholders);
+	public function replacePlaceholders( array $placeholders = [] ): void {
+		if ( count( $placeholders ) > 0 ) {
+			foreach ( $this->config as $section => $values ) {
+				foreach ( $values as $k => $v ) {
+					if ( is_string( $v ) ) {
+						$this->config[ $section ][ $k ] = self::replacePlaceholdersInValue( $v, $placeholders );
 					}
 				}
 			}
@@ -81,8 +83,8 @@ class Config {
 	): string {
 
 		$value = str_replace(
-			array_map(fn ($k) => '{' . $k . '}', array_keys($placeholders)),
-			array_values($placeholders),
+			array_map( fn ( $k) => '{' . $k . '}', array_keys( $placeholders ) ),
+			array_values( $placeholders ),
 			$value
 		);
 

@@ -2,7 +2,11 @@
 	"name": "luistar15/lustra",
 	"type": "library",
 	"description": "PHP minimalistic framework",
-	"keywords": ["micro", "minimalistic", "framework"],
+	"keywords": [
+		"micro",
+		"minimalistic",
+		"framework"
+	],
 	"homepage": "https://github.com/luistar15/lustra",
 	"license": "MIT",
 	"authors": [
@@ -13,11 +17,12 @@
 		}
 	],
 	"require": {
-		"php" : "^8.1"
+		"php": "^8.1"
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^1.10",
-		"squizlabs/php_codesniffer": "3.*"
+		"dealerdirect/phpcodesniffer-composer-installer": "^0.7",
+		"wptrt/wpthemereview": "^0.2"
 	},
 	"autoload": {
 		"psr-4": {
@@ -28,5 +33,10 @@
 		"analyze": "./vendor/bin/phpstan analyze -l 7 -c ./.phpstan/config.neon src",
 		"standards:check": "./vendor/bin/phpcs --standard=./.phpcs/ruleset.xml",
 		"standards:fix": "./vendor/bin/phpcbf --standard=./.phpcs/ruleset.xml"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	}
 }

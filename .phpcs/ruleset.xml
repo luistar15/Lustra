@@ -14,25 +14,16 @@
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 
-	<rule ref="PSR12">
-		<exclude name="Generic.WhiteSpace.DisallowTabIndent" />
-		<exclude name="Generic.Files.LineLength" />
-		<exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
-		<exclude name="PSR12.Classes.OpeningBraceSpace.Found" />
-		<exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody" />
-		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
-		<exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-	</rule>
-
-	<rule ref="Generic.Formatting.MultipleStatementAlignment" />
-
-	<rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
-
-	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent" />
-
-	<rule ref="Generic.WhiteSpace.ScopeIndent">
-		<properties>
-			<property name="tabIndent" value="true" />
-		</properties>
+	<rule ref="./vendor/wp-coding-standards/wpcs/WordPress-Core">
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
+		<exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed" />
+		<exclude name="Squiz.WhiteSpace.SuperfluousWhitespace.EmptyLines" />
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+		<exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid" />
+		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+		<exclude name="WordPress.PHP.YodaConditions.NotYoda" />
+		<exclude name="WordPress.WhiteSpace.ControlStructureSpacing.BlankLineAfterEnd" />
+		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found" />
 	</rule>
 </ruleset>

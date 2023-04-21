@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Lustra\CLI;
 
+
 use Lustra\Validator\Validator;
 use Lustra\Validator\ValidatorException;
+
 
 class Arguments {
 
@@ -42,12 +44,15 @@ class Arguments {
 		array $types = []
 	) {
 
-		[$this->params, $this->rules] = $this->parseParams($params);
+		[ $this->params, $this->rules ] = $this->parseParams( $params );
 
-		$this->types = array_merge($types, [
-			'FLAG'  => '/^[01]$/',
-			'USAGE' => '/^[01]$/',
-		]);
+		$this->types = array_merge(
+			$types,
+			[
+				'FLAG'  => '/^[01]$/',
+				'USAGE' => '/^[01]$/',
+			]
+		);
 	}
 
 
@@ -61,46 +66,46 @@ class Arguments {
 
 		$i = 0;
 		$p = 0;
-		$l = count($args);
+		$l = count( $args );
 
-		while ($i < $l) {
-			[$current_key,] = self::parseArgument($args, $i);
+		while ( $i < $l ) {
+			[ $current_key, ] = self::parseArgument( $args, $i );
 
-			if ($current_key) {
-				$param = $this->findParamByKey($current_key);
+			if ( $current_key ) {
+				$param = $this->findParamByKey( $current_key );
 
-				if ($param) {
+				if ( $param ) {
 					$k = $param['id'];
 
-					if ($param['type'] === 'USAGE') {
+					if ( $param['type'] === 'USAGE' ) {
 						$this->displayUsage();
 					}
 
-					if ($param['type'] === 'FLAG') {
-						$parsed[$k] = '1';
+					if ( $param['type'] === 'FLAG' ) {
+						$parsed[ $k ] = '1';
 
 					} else {
-						[,$next_value] = self::parseArgument($args, $i + 1);
+						[,$next_value] = self::parseArgument( $args, $i + 1 );
 
-						if (is_string($next_value)) {
-							$parsed[$k] = $next_value;
+						if ( is_string( $next_value ) ) {
+							$parsed[ $k ] = $next_value;
 							$i++;
 						}
 					}
 				}
 
 			} else {
-				$positional[$p++] = $args[$i];
+				$positional[ $p++ ] = $args[ $i ];
 			}
 
 			$i++;
 		}
 
-		foreach ($positional as $k => $v) {
-			$param = $this->findParamByKey((string) $k);
+		foreach ( $positional as $k => $v ) {
+			$param = $this->findParamByKey( strval( $k ) );
 
-			if ($param) {
-				$parsed[$param['id']] = $v;
+			if ( $param ) {
+				$parsed[ $param['id'] ] = $v;
 			}
 		}
 
@@ -109,26 +114,26 @@ class Arguments {
 		$data = [];
 
 		try {
-			$data = Validator::parse($parsed, $this->rules, $this->types);
+			$data = Validator::parse( $parsed, $this->rules, $this->types );
 
-			foreach ($this->params as $k => $param) {
-				if ($param['type'] === 'FLAG') {
-					$data[$k] = !!$data[$k];
+			foreach ( $this->params as $k => $param ) {
+				if ( $param['type'] === 'FLAG' ) {
+					$data[ $k ] = ! ! $data[ $k ];
 				}
 			}
 
-		} catch (ValidatorException $e) {
-			if (!$show_usage_on_error || $e->isMissingType()) {
+		} catch ( ValidatorException $e ) {
+			if ( ! $show_usage_on_error || $e->isMissingType() ) {
 				throw $e;
 			}
 
-			if ($e->isMissingValue()) {
+			if ( $e->isMissingValue() ) {
 				$error_message = sprintf(
 					'Missing value for: <%s>',
 					$e->getData()['var']
 				);
 
-			} elseif ($e->isInvalidValue()) {
+			} else if ( $e->isInvalidValue() ) {
 				$error_message = sprintf(
 					'"%s" is not a valid %s for: <%s>',
 					$e->getData()['value'],
@@ -140,20 +145,20 @@ class Arguments {
 				$error_message = $e->getMessage();
 			}
 
-			$this->displayUsageError($error_message);
+			$this->displayUsageError( $error_message );
 		}
 
 		return $data;
 	}
 
 
-	public function displayUsage(string $header = ''): void {
+	public function displayUsage( string $header = '' ): void {
 		$named_params      = [];
 		$positional_params = [];
 
-		foreach ($this->params as $k => $param) {
-			if (is_string($param['key']) && ctype_digit($param['key'])) {
-				$positional_params[(int) $param['key']] = $k;
+		foreach ( $this->params as $k => $param ) {
+			if ( is_string( $param['key'] ) && ctype_digit( $param['key'] ) ) {
+				$positional_params[ intval( $param['key'] ) ] = $k;
 			} else {
 				$named_params[] = $k;
 			}
@@ -163,8 +168,8 @@ class Arguments {
 
 		$positional_options = [];
 
-		foreach ($positional_params as $k) {
-			$param = $this->params[$k];
+		foreach ( $positional_params as $k ) {
+			$param = $this->params[ $k ];
 
 			$param_name  = $k;
 			$required    = $param['required'] ? '(required)  ' : '';
@@ -181,8 +186,8 @@ class Arguments {
 
 		$named_options = [];
 
-		foreach ($named_params as $k) {
-			$param = $this->params[$k];
+		foreach ( $named_params as $k ) {
+			$param = $this->params[ $k ];
 
 			$short_opt   = '   ';
 			$long_opts   = '';
@@ -190,26 +195,29 @@ class Arguments {
 			$required    = '';
 			$description = $param['description'] ?? '';
 
-			if (is_string($param['key'])) {
-				$param['key'] = [$param['key']];
+			if ( is_string( $param['key'] ) ) {
+				$param['key'] = [ $param['key'] ];
 			}
 
-			usort($param['key'], function ($a, $b) {
-				return strlen($a) - strlen($b);
-			});
+			usort(
+				$param['key'],
+				function ( $a, $b ) {
+					return strlen( $a ) - strlen( $b );
+				}
+			);
 
-			if (strlen($param['key'][0]) === 2) {
-				$short_opt  = array_shift($param['key']);
-				$short_opt .= count($param['key']) ? ',' : '';
+			if ( strlen( $param['key'][0] ) === 2 ) {
+				$short_opt  = array_shift( $param['key'] );
+				$short_opt .= count( $param['key'] ) ? ',' : '';
 			}
 
-			$long_opts = implode(', ', $param['key']);
+			$long_opts = implode( ', ', $param['key'] );
 
-			if (!in_array($param['type'], ['FLAG', 'USAGE'])) {
+			if ( ! in_array( $param['type'], [ 'FLAG', 'USAGE' ], true ) ) {
 				$varname = $param['required'] ? "<{$k}>" : "[{$k}]";
 			}
 
-			if ($param['required']) {
+			if ( $param['required'] ) {
 				$required = '(required)  ';
 			}
 
@@ -224,45 +232,45 @@ class Arguments {
 
 		// -------------------
 
-		$usage = 'php ' . ($GLOBALS['argv'][0] ?? 'script');
+		$usage = 'php ' . ( $GLOBALS['argv'][0] ?? 'script' );
 
-		if (count($named_params) > 0) {
+		if ( count( $named_params ) > 0 ) {
 			$usage .= ' [option]...';
 		}
 
-		foreach ($positional_params as $k) {
-			$usage .= $this->params[$k]['required'] ? " <{$k}>" : " [{$k}]";
+		foreach ( $positional_params as $k ) {
+			$usage .= $this->params[ $k ]['required'] ? " <{$k}>" : " [{$k}]";
 		}
 
-		if ($header) {
-			print("{$header}\n");
+		if ( $header ) {
+			print( "{$header}\n" );
 		}
 
-		print("\nUSAGE:\n  {$usage}\n");
+		print( "\nUSAGE:\n  {$usage}\n" );
 
-		self::printTable('PARAMETERS', $positional_options);
-		self::printTable('OPTIONS', $named_options);
+		self::printTable( 'PARAMETERS', $positional_options );
+		self::printTable( 'OPTIONS', $named_options );
 
 		exit;
 	}
 
 
-	public function displayUsageError(string $error_message): void {
-		$this->displayUsage("\e[41mERROR:\e[0m\n  \e[36m{$error_message}\e[0m");
+	public function displayUsageError( string $error_message ): void {
+		$this->displayUsage( "\e[41mERROR:\e[0m\n  \e[36m{$error_message}\e[0m" );
 	}
 
 
 	// -------------------------------------------------------------------------
 
 
-	private function findParamByKey(string $key): ?array {
-		foreach ($this->params as $param) {
-			if (is_string($param['key'])) {
-				if ($key === $param['key']) {
+	private function findParamByKey( string $key ): ?array {
+		foreach ( $this->params as $param ) {
+			if ( is_string( $param['key'] ) ) {
+				if ( $key === $param['key'] ) {
 					return $param;
 				}
 
-			} elseif (in_array($key, $param['key'])) {
+			} else if ( in_array( $key, $param['key'], true ) ) {
 				return $param;
 			}
 		}
@@ -271,20 +279,20 @@ class Arguments {
 	}
 
 
-	private static function parseParams(array $params): array {
+	private static function parseParams( array $params ): array {
 		$rules = [];
 
-		foreach ($params as $k => $param) {
-			$type     = $param['type']     ?? 'TEXT';
+		foreach ( $params as $k => $param ) {
+			$type     = $param['type'] ?? 'TEXT';
 			$required = $param['required'] ?? false;
-			$default  = $param['default']  ?? null;
+			$default  = $param['default'] ?? null;
 
-			if (in_array($type, ['FLAG', 'USAGE'])) {
+			if ( in_array( $type, [ 'FLAG', 'USAGE' ], true ) ) {
 				$required = false;
 			}
 
-			if (is_int($param['key'])) {
-				$param['key'] = (string) $param['key'];
+			if ( is_int( $param['key'] ) ) {
+				$param['key'] = strval( $param['key'] );
 			}
 
 			$param['id']       = $k;
@@ -293,21 +301,21 @@ class Arguments {
 			$param['required'] = $required;
 			$param['default']  = $default;
 
-			$params[$k] = $param;
-			$rules[$k]  = [$type, $required, $default];
+			$params[ $k ] = $param;
+			$rules[ $k ]  = [ $type, $required, $default ];
 		}
 
-		return [$params, $rules];
+		return [ $params, $rules ];
 	}
 
 
-	private static function parseArgument(array $args, int $i): array {
-		if (isset($args[$i])) {
-			$is_key = preg_match('/^(-\w|--[\w\-]+)$/i', $args[$i]);
-			return $is_key ? [$args[$i], null] : [null, $args[$i]];
+	private static function parseArgument( array $args, int $i ): array {
+		if ( isset( $args[ $i ] ) ) {
+			$is_key = preg_match( '/^(-\w|--[\w\-]+)$/i', $args[ $i ] );
+			return $is_key ? [ $args[ $i ], null ] : [ null, $args[ $i ] ];
 		}
 
-		return [null, null];
+		return [ null, null ];
 	}
 
 
@@ -316,35 +324,37 @@ class Arguments {
 		array $rows
 	): void {
 
-		if (count($rows) === 0) {
+		if ( count( $rows ) === 0 ) {
 			return;
 		}
 
 		$col_widths = [];
 
-		foreach ($rows[0] as $i => $col) {
-			$col_widths[$i] = max(array_map(
-				function ($s) {
-					return strlen($s);
-				},
-				array_column($rows, $i)
-			));
+		foreach ( $rows[0] as $i => $col ) {
+			$col_widths[ $i ] = max(
+				array_map(
+					function ( $s ) {
+						return strlen( $s );
+					},
+					array_column( $rows, $i )
+				)
+			);
 		}
 
 		// -----------
 
-		print("\n{$title}:\n");
+		print( "\n{$title}:\n" );
 
-		foreach ($rows as $cols) {
-			foreach ($cols as $i => $col) {
-				if ($i < count($cols)) {
-					print(str_pad($col, $col_widths[$i], ' ', STR_PAD_RIGHT));
+		foreach ( $rows as $cols ) {
+			foreach ( $cols as $i => $col ) {
+				if ( $i < count( $cols ) ) {
+					print( str_pad( $col, $col_widths[ $i ], ' ', STR_PAD_RIGHT ) );
 				} else {
-					print(rtrim($col));
+					print( rtrim( $col ) );
 				}
 			}
 
-			print("\n");
+			print( "\n" );
 		}
 	}
 
