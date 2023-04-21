@@ -10,7 +10,7 @@ class Router {
 	private array $routes = [];
 	private array $routes_methods = [];
 
-	const REQUIREMENTS = [
+	private const REQUIREMENTS = [
 		'digit' => '\d+',
 		'alpha' => '[a-z]+',
 		'slug'  => '[a-z-]+',

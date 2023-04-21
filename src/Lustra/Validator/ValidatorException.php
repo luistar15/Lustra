@@ -8,9 +8,9 @@ use Exception;
 
 class ValidatorException extends Exception {
 
-	const MISSING_TYPE  = 0;
-	const MISSING_VALUE = 1;
-	const INVALID_VALUE = 2;
+	public const MISSING_TYPE  = 0;
+	public const MISSING_VALUE = 1;
+	public const INVALID_VALUE = 2;
 
 	private array $data = [];
 
