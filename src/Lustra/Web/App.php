@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lustra\Web;
 
 use Lustra\Web\Router\Router;
