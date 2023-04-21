@@ -18,12 +18,12 @@ abstract class ActiveRecord {
 	}
 
 
-	public function __set (string $k, string|int|float|bool|null $v) : void {
+	public function __set (string $k, mixed $v) : void {
 		$this->__data[$k] = $v;
 	}
 
 
-	public function __get (string $k) : string|int|float|bool|null {
+	public function __get (string $k) : mixed {
 		return $this->__data[$k] ?? null;
 	}
 

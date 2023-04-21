@@ -18,9 +18,7 @@ class Container {
 	}
 
 
-	/** @param mixed $v */
-
-	public function add (string $k, $v) : void {
+	public function add (string $k, mixed $v) : void {
 		if (is_callable($v)) {
 			$this->builders[$k] = $v;
 		} else {
@@ -29,9 +27,7 @@ class Container {
 	}
 
 
-	/** @return mixed */
-
-	public function get (string $k) {
+	public function get (string $k) : mixed {
 		if (array_key_exists($k, $this->store)) {
 			return $this->store[$k];
 		}
@@ -45,9 +41,7 @@ class Container {
 	}
 
 
-	/** @return mixed */
-
-	public function build (string $k) {
+	public function build (string $k) : mixed {
 		return $this->builders[$k]($this);
 	}
 

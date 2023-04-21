@@ -26,11 +26,9 @@ class Router {
 	}
 
 
-	/** @param string|callable $controller */
-
 	public function addRoute (
 		string $path,
-		       $controller,
+		string|callable $controller,
 		array  $options = []
 
 	) : void {

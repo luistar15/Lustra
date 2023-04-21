@@ -11,7 +11,7 @@ class ErrorHandler {
 
 	private bool $debug;
 
-	/** @var callable|null */
+	/** @var ?callable $handler */
 	private $handler = null;
 
 
@@ -79,7 +79,7 @@ class ErrorHandler {
 
 			exit;
 
-		} else if ($this->handler) {
+		} else if (is_callable($this->handler)) {
 			call_user_func($this->handler, $exception);
 
 		} else {

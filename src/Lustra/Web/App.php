@@ -73,9 +73,7 @@ class App {
 	}
 
 
-	/** @return object */
-
-	public function instantiateService (string $class) {
+	public function instantiateService (string $class) : object {
 		if ( ! class_exists($class) ) {
 			throw new InvalidArgumentException(
 				"'{$class}' argument is not a valid ClassName",

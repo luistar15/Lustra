@@ -42,17 +42,12 @@ class Config {
 	}
 
 
-	/**
-	 * @param mixed $default
-	 * @return mixed
-	 */
-
 	public function get (
 		string $section,
 		string $key,
-		       $default = null,
+		 mixed $default = null,
 		 array $placeholders = []
-	) {
+	) : mixed {
 
 		$value = $this->config[$section][$key] ?? $default;
 
