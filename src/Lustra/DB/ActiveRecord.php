@@ -4,45 +4,46 @@ namespace Lustra\DB;
 
 abstract class ActiveRecord {
 
-	protected DBAL $__db;  // phpcs:ignore
+	protected DBAL $db;
 
-	protected string $__table    = '<table>';  // phpcs:ignore
-	protected string $__pk       = 'id';       // phpcs:ignore
-	protected array $__relations = [];         // phpcs:ignore
-	protected array $__data      = [];         // phpcs:ignore
+	protected string $table = '';
+	protected string $pk    = 'id';
+
+	protected array $relations = [];
+	protected array $data      = [];
 
 
 	public function __construct(DBAL $db) {
-		$this->__db = $db;
+		$this->db = $db;
 	}
 
 
-	public function __set(string $k, mixed $v): void {
-		$this->__data[$k] = $v;
+	public function set(string $k, mixed $v): void {
+		$this->data[$k] = $v;
 	}
 
 
-	public function __get(string $k): mixed {
-		return $this->__data[$k] ?? null;
+	public function get(string $k): mixed {
+		return $this->data[$k] ?? null;
 	}
 
 
 	public function setData(iterable $data): void {
 		foreach ($data as $k => $v) {
-			$this->__data[$k] = $v;
+			$this->data[$k] = $v;
 		}
 	}
 
 
 	public function getData(array $columns = []): array {
 		if (count($columns) === 0) {
-			return $this->__data;
+			return $this->data;
 		}
 
 		$data = [];
 
 		foreach ($columns as $k) {
-			$data[$k] = $this->__data[$k];
+			$data[$k] = $this->data[$k];
 		}
 
 		return $data;
@@ -50,12 +51,12 @@ abstract class ActiveRecord {
 
 
 	public function getPk(): ?string {
-		return $this->__data[$this->__pk] ?? null;
+		return $this->data[$this->pk] ?? null;
 	}
 
 
 	public function setPk(?string $pk): void {
-		$this->__data[$this->__pk] = $pk;
+		$this->data[$this->pk] = $pk;
 	}
 
 
@@ -82,9 +83,9 @@ abstract class ActiveRecord {
 			);
 		}
 
-		$this->__data = current($rows);
+		$this->data = current($rows);
 
-		return $this->__data;
+		return $this->data;
 	}
 
 
@@ -101,7 +102,7 @@ abstract class ActiveRecord {
 
 
 	public function loadByPk(string $pk): array {
-		return $this->loadByColumn($this->__pk, $pk);
+		return $this->loadByColumn($this->pk, $pk);
 	}
 
 
@@ -112,12 +113,12 @@ abstract class ActiveRecord {
 		$data = $this->getData($columns);
 
 		if ($this->exists()) {
-			$this->__db->update($this->__table, $data);
+			$this->db->update($this->table, $data);
 
 		} else {
-			$this->__db->insert($this->__table, $data);
+			$this->db->insert($this->table, $data);
 
-			$insert_id = $this->__db->lastInsertId();
+			$insert_id = $this->db->lastInsertId();
 
 			if (is_string($insert_id)) {
 				$this->setPk($insert_id);
@@ -127,9 +128,9 @@ abstract class ActiveRecord {
 
 
 	public function delete(): void {
-		$this->__db->delete(
-			$this->__table,
-			['WHERE' => sprintf("`%s` = :pk", $this->__pk)],
+		$this->db->delete(
+			$this->table,
+			['WHERE' => sprintf("`%s` = :pk", $this->pk)],
 			[':pk' => $this->getPk()]
 		);
 	}
@@ -143,13 +144,13 @@ abstract class ActiveRecord {
 		array $bindings = []
 	): array {
 
-		$query = array_merge($query, ['FROM' => $this->__table]);
+		$query = array_merge($query, ['FROM' => $this->table]);
 
 		if (isset($query['JOIN'])) {
-			$query['JOIN'] = SQLBuilder::parseJoins((array) $query['JOIN'], $this->__relations);
+			$query['JOIN'] = SQLBuilder::parseJoins((array) $query['JOIN'], $this->relations);
 		}
 
-		$rows = $this->__db->getRows(SQLBuilder::build($query), $bindings);
+		$rows = $this->db->getRows(SQLBuilder::build($query), $bindings);
 
 		if (is_array($rows)) {
 			return $rows;
@@ -158,7 +159,7 @@ abstract class ActiveRecord {
 
 
 	public function getDb(): DBAL {
-		return $this->__db;
+		return $this->db;
 	}
 
 }
