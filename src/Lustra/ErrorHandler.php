@@ -2,10 +2,8 @@
 
 namespace Lustra;
 
-
 use Throwable;
 use ErrorException;
-
 
 class ErrorHandler {
 
@@ -15,17 +13,16 @@ class ErrorHandler {
 	private $handler = null;
 
 
-	public function __construct () {
+	public function __construct() {
 		$this->setup(true);
 		$this->register();
 	}
 
 
-	public function setup (
-		  bool $debug,
+	public function setup(
+		bool $debug,
 		string $error_log = ''
-
-	) : void {
+	): void {
 
 		$this->debug = $debug;
 
@@ -37,25 +34,24 @@ class ErrorHandler {
 	}
 
 
-	private function register () : void {
+	private function register(): void {
 		set_error_handler([$this, 'handleError']);
 		set_exception_handler([$this, 'handleException']);
 		register_shutdown_function([$this, 'handleShutdown']);
 	}
 
 
-	public function setHandler (callable $handler) : void {
+	public function setHandler(callable $handler): void {
 		$this->handler = $handler;
 	}
 
 
-	public function handleError (
-		int    $level,
+	public function handleError(
+		int $level,
 		string $message,
 		string $file,
-		int    $line
-
-	) : bool {
+		int $line
+	): bool {
 
 		$this->handleException(
 			new ErrorException($message, $level, $level, $file, $line)
@@ -65,7 +61,7 @@ class ErrorHandler {
 	}
 
 
-	public function handleException (Throwable $exception) : void {
+	public function handleException(Throwable $exception): void {
 		if ($this->debug) {
 			if (ob_get_length()) {
 				ob_clean();
@@ -79,7 +75,7 @@ class ErrorHandler {
 
 			exit;
 
-		} else if (is_callable($this->handler)) {
+		} elseif (is_callable($this->handler)) {
 			call_user_func($this->handler, $exception);
 
 		} else {
@@ -88,7 +84,7 @@ class ErrorHandler {
 	}
 
 
-	public function handleShutdown () : void {
+	public function handleShutdown(): void {
 		$error = error_get_last();
 
 		if ($error) {
@@ -102,7 +98,7 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionHtml (Throwable $exception) : void {
+	private static function dumpExceptionHtml(Throwable $exception): void {
 		$html = sprintf(
 			"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
 			htmlspecialchars(get_class($exception)),
@@ -148,8 +144,10 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionCli (Throwable $exception) : void {
-		$color = function ($str, $code) { return "\e[{$code}m{$str}\e[0m"; };
+	private static function dumpExceptionCli(Throwable $exception): void {
+		$color = function ($str, $code) {
+			return "\e[{$code}m{$str}\e[0m";
+		};
 
 		printf(
 			"\n%s\n%s\n%s (%s)\n\n",

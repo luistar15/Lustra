@@ -2,18 +2,16 @@
 
 namespace Lustra\Web\Router;
 
-
 final class RouterFactory {
 
-	public static function build (
+	public static function build(
 		string $path_prefix,
 		string $source_file,
 		string $cache_file = null,
-		bool   $use_cache = true,
+		bool $use_cache = true,
 		string $controller_namespace = null,
 		string $controller_suffix = null
-
-	) : Router {
+	): Router {
 
 		$router = new Router($path_prefix);
 
@@ -74,7 +72,7 @@ final class RouterFactory {
 	}
 
 
-	public static function fixRoutesTree (array $tree) : array {
+	public static function fixRoutesTree(array $tree): array {
 
 		$CamelCase = function ($str) {
 			return strtr(ucwords(preg_replace('/[^a-z0-9]+/i', ' ', strtolower($str))), [' ' => '']);
@@ -113,7 +111,7 @@ final class RouterFactory {
 				if (isset($node['controller_class'])) {
 					$controller_class = [$node['controller_class']];
 
-				} else if ($is_group || !$has_parent) {
+				} elseif ($is_group || !$has_parent) {
 					$controller_class = [$CamelCase($node_id)];
 
 				} else {
@@ -123,7 +121,7 @@ final class RouterFactory {
 				if (isset($node['controller_method'])) {
 					$controller_method = $node['controller_method'];
 
-				} else if (!$is_group && $has_parent && !isset($node['controller_class'])) {
+				} elseif (!$is_group && $has_parent && !isset($node['controller_class'])) {
 					$controller_method = $lowerCamelCase($node_id);
 
 				} else {
@@ -136,7 +134,7 @@ final class RouterFactory {
 
 				if (isset($node['methods'])) {
 					$methods = $node['methods'];
-				} else if (!$is_group) {
+				} elseif (!$is_group) {
 					$methods = ['GET'];
 				}
 
@@ -151,7 +149,7 @@ final class RouterFactory {
 					$node['childs'] = $walker($childs, true);
 				} else {
 					$node['controller_method'] = $controller_method;
-					$node['methods'] = $methods;
+					$node['methods']           = $methods;
 				}
 
 				$fixed[$node_id] = $node;
@@ -164,11 +162,11 @@ final class RouterFactory {
 	}
 
 
-	public static function flattenRoutesTree (array $tree) : array {
+	public static function flattenRoutesTree(array $tree): array {
 
 		$flatten = [];
 
-		$flattener = function (array $nodes) use (&$flattener) : iterable {
+		$flattener = function (array $nodes) use (&$flattener): iterable {
 			foreach ($nodes as $node_id => $node) {
 				if (isset($node['childs'])) {
 					foreach ($flattener($node['childs']) as $child_id => $child) {

@@ -2,20 +2,16 @@
 
 namespace Lustra\Web;
 
-
 use Lustra\Web\Router\Router;
 use Lustra\Container;
-
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
 use ReflectionNamedType;
-
 use Closure;
 use InvalidArgumentException;
-use ReflectionType;
 
 class App {
 
@@ -28,8 +24,8 @@ class App {
 	public array $route;
 
 
-	public function __construct (
-		Router    $router,
+	public function __construct(
+		Router $router,
 		Container $container
 	) {
 
@@ -40,7 +36,7 @@ class App {
 	}
 
 
-	public function run () : void {
+	public function run(): void {
 
 		$path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		$method = $_SERVER['REQUEST_METHOD'];
@@ -52,7 +48,7 @@ class App {
 	}
 
 
-	public function loadController () : void {
+	public function loadController(): void {
 
 		$controller = $this->route['controller'];
 
@@ -73,14 +69,14 @@ class App {
 	}
 
 
-	public function instantiateService (string $class) : object {
-		if ( ! class_exists($class) ) {
+	public function instantiateService(string $class): object {
+		if (! class_exists($class)) {
 			throw new InvalidArgumentException(
 				"'{$class}' argument is not a valid ClassName",
 			);
 		}
 
-		$reflection = new ReflectionClass($class);
+		$reflection  = new ReflectionClass($class);
 		$constructor = $reflection->getConstructor();
 
 		if ($constructor) {
@@ -92,11 +88,10 @@ class App {
 	}
 
 
-	public function findServiceArguments (
+	public function findServiceArguments(
 		ReflectionFunctionAbstract $function,
 		bool $include_route_parameters = false
-
-	) : array {
+	): array {
 
 		$args = [];
 
@@ -114,36 +109,36 @@ class App {
 				$arg_class = $arg_class->getName();
 
 				if ($this instanceof $arg_class) {
-					$arg = $this;
+					$arg   = $this;
 					$found = true;
 
-				} else if ($this->container->has($arg_class)) {
-					$arg = $this->container->get($arg_class);
+				} elseif ($this->container->has($arg_class)) {
+					$arg   = $this->container->get($arg_class);
 					$found = true;
 				}
 
-			} else if (
+			} elseif (
 				$include_route_parameters &&
 				$arg_type instanceof ReflectionNamedType &&
 				$arg_type->getName() === 'string' &&
 				isset($this->route['parameters'][$arg_name])
 			) {
-				$arg = $this->route['parameters'][$arg_name];
+				$arg   = $this->route['parameters'][$arg_name];
 				$found = true;
 			}
 
 			if (!$found && $parameter->isDefaultValueAvailable()) {
-				$arg = $parameter->getDefaultValue();
+				$arg   = $parameter->getDefaultValue();
 				$found = true;
 			}
 
 			if ($found) {
 				$args[] = $arg;
 
-			} else if ($parameter->isOptional()) {
+			} elseif ($parameter->isOptional()) {
 				break;
 
-			} else if ($function instanceof ReflectionMethod){
+			} elseif ($function instanceof ReflectionMethod) {
 				throw new InvalidArgumentException(sprintf(
 					"'{$arg_name}' argument was not found for: %s->%s()",
 					$function->getDeclaringClass()->getName(),
@@ -162,7 +157,7 @@ class App {
 	}
 
 
-	private function getReflectionClass(ReflectionParameter $parameter) : ?ReflectionClass {
+	private function getReflectionClass(ReflectionParameter $parameter): ?ReflectionClass {
 		$type = $parameter->getType();
 
 		if (is_null($type)) {
@@ -185,26 +180,24 @@ class App {
 	}
 
 
-	public function setTemplateDir (string $path) : void {
+	public function setTemplateDir(string $path): void {
 		$this->template_dir = $path;
 	}
 
 
-	public function template (
+	public function template(
 		string $path,
 		string $ext = 'phtml'
-
-	) : string {
+	): string {
 
 		return $this->template_dir . "/{$path}.{$ext}";
 	}
 
 
-	public function render (
+	public function render(
 		string $path,
 		array &$data = null
-
-	) : void {
+	): void {
 
 		if ($data) {
 			extract($data, EXTR_REFS);
@@ -216,11 +209,10 @@ class App {
 	}
 
 
-	public static function redirect (
+	public static function redirect(
 		string $url,
-		int    $code = 302
-
-	) : void {
+		int $code = 302
+	): void {
 
 		header("Location: {$url}", true, $code);
 		exit;

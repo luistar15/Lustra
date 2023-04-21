@@ -2,7 +2,6 @@
 
 namespace Lustra\Validator;
 
-
 class Validator {
 
 	/*
@@ -11,12 +10,11 @@ class Validator {
 	 * ]);
 	 */
 
-	public static function validate (
+	public static function validate(
 		array $source,
 		array $rules,
 		array $types = []
-
-	) : bool {
+	): bool {
 
 		$valid = true;
 
@@ -30,12 +28,11 @@ class Validator {
 	}
 
 
-	public static function parse (
+	public static function parse(
 		array $source,
 		array $rules,
 		array $types = []
-
-	) : array {
+	): array {
 
 		$parsed = [];
 
@@ -55,7 +52,7 @@ class Validator {
 					"Missing value for: {$k}"
 				);
 
-			} else if (!$missing && !self::validateValue($value, $type, $types)) {
+			} elseif (!$missing && !self::validateValue($value, $type, $types)) {
 				$error = ValidatorException::build(
 					ValidatorException::INVALID_VALUE,
 					"'{$value}' is not a valid {$type} value for: {$k}"
@@ -80,12 +77,11 @@ class Validator {
 	}
 
 
-	public static function validateValue (
+	public static function validateValue(
 		string $value,
 		string $type,
-		array  $types = []
-
-	) : bool {
+		array $types = []
+	): bool {
 
 		if (isset(self::$types[$type])) {
 			return (bool) preg_match(self::$types[$type], $value);

@@ -2,10 +2,8 @@
 
 namespace Lustra\CLI;
 
-
 use Lustra\Validator\Validator;
 use Lustra\Validator\ValidatorException;
-
 
 class Arguments {
 
@@ -37,7 +35,7 @@ class Arguments {
 	 * ]));
 	 */
 
-	public function __construct (
+	public function __construct(
 		array $params,
 		array $types = []
 	) {
@@ -51,11 +49,10 @@ class Arguments {
 	}
 
 
-	public function parse (
+	public function parse(
 		array $args,
-		bool  $show_usage_on_error = true
-
-	) : array {
+		bool $show_usage_on_error = true
+	): array {
 
 		$parsed     = [];
 		$positional = [];
@@ -81,7 +78,7 @@ class Arguments {
 						$parsed[$k] = '1';
 
 					} else {
-						[,$next_value]  = self::parseArgument($args, $i + 1);
+						[,$next_value] = self::parseArgument($args, $i + 1);
 
 						if (is_string($next_value)) {
 							$parsed[$k] = $next_value;
@@ -119,7 +116,6 @@ class Arguments {
 			}
 
 		} catch (ValidatorException $e) {
-
 			if (!$show_usage_on_error || $e->isMissingType()) {
 				throw $e;
 			}
@@ -130,7 +126,7 @@ class Arguments {
 					$e->getData()['var']
 				);
 
-			} else if ($e->isInvalidValue()) {
+			} elseif ($e->isInvalidValue()) {
 				$error_message = sprintf(
 					'"%s" is not a valid %s for: <%s>',
 					$e->getData()['value'],
@@ -149,7 +145,7 @@ class Arguments {
 	}
 
 
-	public function displayUsage (string $header = '') : void {
+	public function displayUsage(string $header = ''): void {
 		$named_params      = [];
 		$positional_params = [];
 
@@ -196,10 +192,12 @@ class Arguments {
 				$param['key'] = [$param['key']];
 			}
 
-			usort($param['key'], function ($a, $b) { return strlen($a) - strlen($b); });
+			usort($param['key'], function ($a, $b) {
+				return strlen($a) - strlen($b);
+			});
 
 			if (strlen($param['key'][0]) === 2) {
-				$short_opt = array_shift($param['key']);
+				$short_opt  = array_shift($param['key']);
 				$short_opt .= count($param['key']) ? ',' : '';
 			}
 
@@ -247,7 +245,7 @@ class Arguments {
 	}
 
 
-	public function displayUsageError (string $error_message) : void {
+	public function displayUsageError(string $error_message): void {
 		$this->displayUsage("\e[41mERROR:\e[0m\n  \e[36m{$error_message}\e[0m");
 	}
 
@@ -255,14 +253,14 @@ class Arguments {
 	// -------------------------------------------------------------------------
 
 
-	private function findParamByKey (string $key) : ?array {
+	private function findParamByKey(string $key): ?array {
 		foreach ($this->params as $param) {
 			if (is_string($param['key'])) {
 				if ($key === $param['key']) {
 					return $param;
 				}
 
-			} else if (in_array($key, $param['key'])) {
+			} elseif (in_array($key, $param['key'])) {
 				return $param;
 			}
 		}
@@ -271,7 +269,7 @@ class Arguments {
 	}
 
 
-	private static function parseParams (array $params) : array {
+	private static function parseParams(array $params): array {
 		$rules = [];
 
 		foreach ($params as $k => $param) {
@@ -301,7 +299,7 @@ class Arguments {
 	}
 
 
-	private static function parseArgument (array $args, int $i) : array {
+	private static function parseArgument(array $args, int $i): array {
 		if (isset($args[$i])) {
 			$is_key = preg_match('/^(-\w|--[\w\-]+)$/i', $args[$i]);
 			return $is_key ? [$args[$i], null] : [null, $args[$i]];
@@ -311,11 +309,10 @@ class Arguments {
 	}
 
 
-	private static function printTable (
+	private static function printTable(
 		string $title,
-		array  $rows
-
-	) : void {
+		array $rows
+	): void {
 
 		if (count($rows) === 0) {
 			return;
@@ -325,7 +322,9 @@ class Arguments {
 
 		foreach ($rows[0] as $i => $col) {
 			$col_widths[$i] = max(array_map(
-				function ($s) { return strlen($s); },
+				function ($s) {
+					return strlen($s);
+				},
 				array_column($rows, $i)
 			));
 		}

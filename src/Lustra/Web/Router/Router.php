@@ -2,12 +2,11 @@
 
 namespace Lustra\Web\Router;
 
-
 class Router {
 
 	private string $path_prefix;
 
-	private array $routes = [];
+	private array $routes         = [];
 	private array $routes_methods = [];
 
 	private const REQUIREMENTS = [
@@ -21,17 +20,16 @@ class Router {
 	];
 
 
-	public function __construct (string $path_prefix = '/') {
+	public function __construct(string $path_prefix = '/') {
 		$this->path_prefix = $path_prefix;
 	}
 
 
-	public function addRoute (
+	public function addRoute(
 		string $path,
 		string|callable $controller,
-		array  $options = []
-
-	) : void {
+		array $options = []
+	): void {
 
 		$name         = $options['name']         ?? 'route-' . count($this->routes);
 		$requirements = $options['requirements'] ?? [];
@@ -60,11 +58,10 @@ class Router {
 	}
 
 
-	public function findMatch (
+	public function findMatch(
 		string $path,
 		string $method = null
-
-	) : array {
+	): array {
 
 		$route = null;
 
@@ -76,14 +73,16 @@ class Router {
 			$temp = $this->routes[$route_name];
 
 			if ($temp['path'] === $path) {
-				$route = $temp;
+				$route               = $temp;
 				$route['parameters'] = [];
 
-			} else if (isset($temp['path_regexp']) && preg_match($temp['path_regexp'], $path, $matches)) {
-				$route = $temp;
+			} elseif (isset($temp['path_regexp']) && preg_match($temp['path_regexp'], $path, $matches)) {
+				$route               = $temp;
 				$route['parameters'] = array_filter(
 					array_slice(array_filter($matches), 1),
-					function ($k) { return !is_int($k); },
+					function ($k) {
+						return !is_int($k);
+					},
 					ARRAY_FILTER_USE_KEY
 				);
 			}
@@ -98,11 +97,10 @@ class Router {
 	}
 
 
-	public function pathFor (
+	public function pathFor(
 		string $route_name,
-		array  $parameters = null
-
-	) : string {
+		array $parameters = null
+	): string {
 
 		$route = $this->routes[$route_name];
 		$path  = $route['path'];
@@ -110,8 +108,10 @@ class Router {
 		if (isset($route['path_regexp'])) {
 			// replace parameters values
 			if (is_array($parameters) && count($parameters) > 0) {
-				$placeholders = array_map(function ($k) { return "{{$k}}"; }, array_keys($parameters));
-				$path = str_replace($placeholders, array_values($parameters), $route['path']);
+				$placeholders = array_map(function ($k) {
+					return "{{$k}}";
+				}, array_keys($parameters));
+				$path         = str_replace($placeholders, array_values($parameters), $route['path']);
 			}
 
 			// clear optional parameters
@@ -124,13 +124,12 @@ class Router {
 	}
 
 
-	public function urlFor (
+	public function urlFor(
 		string $route_name,
-		array  $parameters = null,
-		array  $getvars = null,
-		bool   $include_prefix = true
-
-	) : string {
+		array $parameters = null,
+		array $getvars = null,
+		bool $include_prefix = true
+	): string {
 
 		$url = $this->pathFor($route_name, $parameters);
 
@@ -146,12 +145,12 @@ class Router {
 	}
 
 
-	public function import (array $data) : void {
+	public function import(array $data): void {
 		[$this->routes, $this->routes_methods] = $data;
 	}
 
 
-	public function export () : array {
+	public function export(): array {
 		return [$this->routes, $this->routes_methods];
 	}
 
@@ -159,12 +158,11 @@ class Router {
 	// -------------------------------------------------------------------------
 
 
-	public static function parsePath (
+	public static function parsePath(
 		string $path,
-		array  $requirements,
-		array  $constraints
-
-	) : array {
+		array $requirements,
+		array $constraints
+	): array {
 
 		$requirements = array_merge(self::REQUIREMENTS, $requirements);
 
@@ -187,7 +185,7 @@ class Router {
 
 			if ($param_req) {
 				$regex = $requirements[$param_req] ?? $param_req;
-			} else if (isset($constraints[$param_name])) {
+			} elseif (isset($constraints[$param_name])) {
 				$regex = $requirements[$constraints[$param_name]] ?? $constraints[$param_name];
 			} else {
 				$regex = $requirements['text'];

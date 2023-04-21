@@ -2,13 +2,11 @@
 
 namespace Lustra\DB;
 
-
 use Exception;
-
 
 class SQLBuilder {
 
-	public static function build (array $query) : string {
+	public static function build(array $query): string {
 
 		$query = array_merge([
 			'DISTINCT' => false,
@@ -32,7 +30,9 @@ class SQLBuilder {
 
 			switch ($k) {
 				case 'DISTINCT':
-					if ($v) { $sql[] = $k; }
+					if ($v) {
+						$sql[] = $k;
+					}
 					break;
 
 				case 'COLUMNS':
@@ -41,21 +41,29 @@ class SQLBuilder {
 
 				case 'FROM':
 				case 'LIMIT':
-					if ($v) { $sql[] = "{$k} {$v}"; }
+					if ($v) {
+						$sql[] = "{$k} {$v}";
+					}
 					break;
 
 				case 'JOIN':
-					if (count($v) > 0) { $sql[] = implode(' ', $v); }
+					if (count($v) > 0) {
+						$sql[] = implode(' ', $v);
+					}
 					break;
 
 				case 'WHERE':
 				case 'HAVING':
-					if (count($v) > 0) { $sql[] = "{$k} " . implode(' AND ' , $v); }
+					if (count($v) > 0) {
+						$sql[] = "{$k} " . implode(' AND ', $v);
+					}
 					break;
 
 				case 'GROUP':
 				case 'ORDER':
-					if (count($v) > 0) { $sql[] = "{$k} BY " . implode(', ' , $v); }
+					if (count($v) > 0) {
+						$sql[] = "{$k} BY " . implode(', ', $v);
+					}
 					break;
 			}
 		}
@@ -64,11 +72,10 @@ class SQLBuilder {
 	}
 
 
-	public static function parseJoins (
+	public static function parseJoins(
 		array $joins,
 		array $relations = []
-
-	) : array {
+	): array {
 
 		$parsed = [];
 
