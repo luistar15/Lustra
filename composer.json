@@ -21,7 +21,7 @@
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^1.10",
-		"dealerdirect/phpcodesniffer-composer-installer": "^0.7",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
 		"wptrt/wpthemereview": "^0.2"
 	},
 	"autoload": {

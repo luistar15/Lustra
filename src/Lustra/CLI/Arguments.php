@@ -319,6 +319,9 @@ class Arguments {
 	}
 
 
+	/**
+	 * @param string[][] $rows
+	 */
 	private static function printTable(
 		string $title,
 		array $rows
