@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra;
 
 
@@ -18,7 +19,6 @@ class ErrorHandler {
 
 
 	public function __construct() {
-		$this->setup( true );
 		$this->register();
 	}
 
@@ -26,7 +26,7 @@ class ErrorHandler {
 	public function setup(
 		bool $debug,
 		string $error_log = ''
-	): void {
+	) : void {
 
 		$this->debug = $debug;
 
@@ -38,14 +38,14 @@ class ErrorHandler {
 	}
 
 
-	private function register(): void {
+	private function register() : void {
 		set_error_handler( [ $this, 'handleError' ] );
 		set_exception_handler( [ $this, 'handleException' ] );
 		register_shutdown_function( [ $this, 'handleShutdown' ] );
 	}
 
 
-	public function setHandler( callable $handler ): void {
+	public function setHandler( callable $handler ) : void {
 		$this->handler = $handler;
 	}
 
@@ -55,7 +55,7 @@ class ErrorHandler {
 		string $message,
 		string $file,
 		int $line
-	): bool {
+	) : bool {
 
 		$this->handleException(
 			new ErrorException( $message, $level, $level, $file, $line )
@@ -65,7 +65,7 @@ class ErrorHandler {
 	}
 
 
-	public function handleException( Throwable $exception ): void {
+	public function handleException( Throwable $exception ) : void {
 		if ( $this->debug ) {
 			if ( ob_get_length() ) {
 				ob_clean();
@@ -88,7 +88,7 @@ class ErrorHandler {
 	}
 
 
-	public function handleShutdown(): void {
+	public function handleShutdown() : void {
 		$error = error_get_last();
 
 		if ( $error ) {
@@ -102,7 +102,7 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionHtml( Throwable $exception ): void {
+	private static function dumpExceptionHtml( Throwable $exception ) : void {
 		$html = sprintf(
 			"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
 			htmlspecialchars( get_class( $exception ) ),
@@ -148,7 +148,7 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionCli( Throwable $exception ): void {
+	private static function dumpExceptionCli( Throwable $exception ) : void {
 		$color = function ( $str, $code ) {
 			return "\e[{$code}m{$str}\e[0m";
 		};

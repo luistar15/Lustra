@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\Validator;
 
 
@@ -21,7 +22,7 @@ class ValidatorException extends Exception {
 		int $code = 0,
 		string $message = '',
 		array $data = []
-	): self {
+	) : self {
 
 		$e = new self( $message, $code );
 		$e->setData( $data );
@@ -30,27 +31,27 @@ class ValidatorException extends Exception {
 	}
 
 
-	public function setData( array $data ): void {
+	public function setData( array $data ) : void {
 		$this->data = $data;
 	}
 
 
-	public function getData(): array {
+	public function getData() : array {
 		return $this->data;
 	}
 
 
-	public function isMissingType(): bool {
+	public function isMissingType() : bool {
 		return $this->getCode() === self::MISSING_TYPE;
 	}
 
 
-	public function isMissingValue(): bool {
+	public function isMissingValue() : bool {
 		return $this->getCode() === self::MISSING_VALUE;
 	}
 
 
-	public function isInvalidValue(): bool {
+	public function isInvalidValue() : bool {
 		return $this->getCode() === self::INVALID_VALUE;
 	}
 

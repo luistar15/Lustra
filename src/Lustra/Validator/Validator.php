@@ -2,22 +2,25 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\Validator;
 
 
 class Validator {
 
 	/*
-	 * $params = Validator::parse($array_source, [
-	 * 	'array_key' => [ $data_type, $required_flag, $default_value ],
-	 * ]);
+	 * $params = Validator::validate(
+	 *   $array_source,
+	 *   [
+	 * 	   'array_key' => [ $data_type, $required_flag, $default_value ],
+	 *   ]
+	 * );
 	 */
-
 	public static function validate(
 		array $source,
 		array $rules,
 		array $types = []
-	): bool {
+	) : bool {
 
 		$valid = true;
 
@@ -35,7 +38,7 @@ class Validator {
 		array $source,
 		array $rules,
 		array $types = []
-	): array {
+	) : array {
 
 		$parsed = [];
 
@@ -86,7 +89,7 @@ class Validator {
 		string $value,
 		string $type,
 		array $types = []
-	): bool {
+	) : bool {
 
 		if ( isset( self::$types[ $type ] ) ) {
 			return preg_match( self::$types[ $type ], $value ) === 1;

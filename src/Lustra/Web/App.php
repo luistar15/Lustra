@@ -2,31 +2,32 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\Web;
 
 
-use Lustra\Web\Router\Router;
 use Lustra\Container;
+use Lustra\Web\Router\Router;
 
+use Closure;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
 use ReflectionNamedType;
-use Closure;
-use InvalidArgumentException;
 
 
 class App {
 
-	protected Container $container;
+	public Container $container;
 
-	protected Router $router;
-
-	private string $template_dir = '.';
+	public Router $router;
 
 	public array $route;
+
+	private string $template_dir = '.';
 
 
 	public function __construct(
@@ -41,8 +42,7 @@ class App {
 	}
 
 
-	public function run(): void {
-
+	public function run() : void {
 		$path   = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		$method = $_SERVER['REQUEST_METHOD'];
 
@@ -53,20 +53,24 @@ class App {
 	}
 
 
-	public function loadController(): void {
-
+	public function loadController() : void {
 		$controller = $this->route['controller'];
 
-		// clousure
 		if ( $controller instanceof Closure ) {
-			$arguments = $this->findServiceArguments( new ReflectionFunction( $controller ), true );
+			$arguments = $this->findServiceArguments(
+				new ReflectionFunction( $controller ),
+				true
+			);
+
 			$controller( ...$arguments );
 
-			// class
 		} else {
 			[ $class, $method ] = explode( '@', $controller );
 
-			$arguments = $this->findServiceArguments( new ReflectionMethod( $class, $method ), true );
+			$arguments = $this->findServiceArguments(
+				new ReflectionMethod( $class, $method ),
+				true
+			);
 
 			$controller = $this->instantiateService( $class );
 			$controller->{$method}( ...$arguments );
@@ -74,7 +78,7 @@ class App {
 	}
 
 
-	public function instantiateService( string $class ): object {
+	public function instantiateService( string $class ) : object {
 		if ( ! class_exists( $class ) ) {
 			throw new InvalidArgumentException(
 				"'{$class}' argument is not a valid ClassName",
@@ -96,7 +100,7 @@ class App {
 	public function findServiceArguments(
 		ReflectionFunctionAbstract $function,
 		bool $include_route_parameters = false
-	): array {
+	) : array {
 
 		$args = [];
 
@@ -166,7 +170,7 @@ class App {
 	}
 
 
-	private function getReflectionClass( ReflectionParameter $parameter ): ?ReflectionClass {
+	private function getReflectionClass( ReflectionParameter $parameter ) : ?ReflectionClass {
 		$type = $parameter->getType();
 
 		if ( is_null( $type ) ) {
@@ -189,40 +193,28 @@ class App {
 	}
 
 
-	public function setTemplateDir( string $path ): void {
+	public function setTemplateDir( string $path ) : void {
 		$this->template_dir = $path;
 	}
 
 
-	public function template(
-		string $path,
-		string $ext = 'phtml'
-	): string {
-
-		return $this->template_dir . "/{$path}.{$ext}";
+	public function getTemplatePath( string $filename, string $ext = 'php' ) : string {
+		return "{$this->template_dir}/{$filename}.{$ext}";
 	}
 
 
-	public function render(
-		string $path,
-		array &$data = null
-	): void {
-
-		if ( $data ) {
+	public function render( string $path, array &$data = null ) : void {
+		if ( is_array( $data ) ) {
 			extract( $data, EXTR_REFS ); // phpcs:ignore
 		}
 
 		ob_start();
-		require $this->template( $path );
+		require $this->getTemplatePath( $path );
 		ob_end_flush();
 	}
 
 
-	public static function redirect(
-		string $url,
-		int $code = 302
-	): void {
-
+	public static function redirect( string $url, int $code = 302 ) : void {
 		header( "Location: {$url}", true, $code );
 		exit;
 	}

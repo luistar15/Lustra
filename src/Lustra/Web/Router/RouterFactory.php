@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\Web\Router;
 
 
@@ -9,30 +10,27 @@ final class RouterFactory {
 
 	public static function build(
 		string $path_prefix,
-		string $source_file,
-		string $cache_file,
-		bool $use_cache = true,
+		string $routes_config_file,
+		?string $cache_file = null,
 		string $controller_namespace = 'Site\\Controller',
 		string $controller_suffix = 'Controller'
-	): Router {
+	) : Router {
 
 		$router = new Router( $path_prefix );
 
-		$cache_file_exists = is_file( $cache_file );
-
-		if ( $use_cache && $cache_file_exists ) {
+		if ( is_string( $cache_file ) && is_file( $cache_file ) ) {
 			$router->import( require $cache_file );
 			return $router;
 		}
 
 		// ------------------------------------------
 
-		$source = require $source_file;
+		$config = require $routes_config_file;
 
-		$routes_requirements = $source['requirements'] ?? [];
-		$routes_constraints  = $source['constraints'] ?? [];
+		$routes_requirements = $config['requirements'] ?? [];
+		$routes_constraints  = $config['constraints'] ?? [];
 
-		$routes = self::flattenRoutesTree( self::fixRoutesTree( $source['routes'] ) );
+		$routes = self::flattenRoutesTree( self::fixRoutesTree( $config['routes'] ) );
 
 		foreach ( $routes as $route_name => $route ) {
 			$controller_class  = $route['controller_class'];
@@ -62,7 +60,7 @@ final class RouterFactory {
 
 		// ------------------------------------------
 
-		if ( ! $cache_file_exists ) {
+		if ( is_string( $cache_file ) && ! is_file( $cache_file ) ) {
 			$data = var_export( $router->export(), true );
 
 			// unnecesary dummy format
@@ -79,10 +77,12 @@ final class RouterFactory {
 	}
 
 
-	public static function fixRoutesTree( array $tree ): array {
-
+	public static function fixRoutesTree( array $tree ) : array {
 		$camel_case = function ( $str ) {
-			return strtr( ucwords( preg_replace( '/[^a-z0-9]+/i', ' ', strtolower( $str ) ) ), [ ' ' => '' ] );
+			return strtr(
+				ucwords( preg_replace( '/[^a-z0-9]+/i', ' ', strtolower( $str ) ) ),
+				[ ' ' => '' ]
+			);
 		};
 
 		$lower_camel_case = function ( $str ) use ( &$camel_case ) {
@@ -90,7 +90,14 @@ final class RouterFactory {
 			return strtolower( substr( $str, 0, 1 ) ) . substr( $str, 1 );
 		};
 
-		$walker = function ( array $nodes, bool $has_parent ) use ( &$walker, &$camel_case, &$lower_camel_case ) {
+		$walker = function (
+			array $nodes,
+			bool $has_parent
+		) use (
+			&$walker,
+			&$camel_case,
+			&$lower_camel_case
+		) {
 
 			$fixed = [];
 
@@ -169,16 +176,19 @@ final class RouterFactory {
 	}
 
 
-	public static function flattenRoutesTree( array $tree ): array {
-
+	public static function flattenRoutesTree( array $tree ) : array {
 		$flatten = [];
 
-		$flattener = function ( array $nodes ) use ( &$flattener ): iterable {
+		$flattener = function ( array $nodes ) use ( &$flattener ) : iterable {
 			foreach ( $nodes as $node_id => $node ) {
 				if ( isset( $node['childs'] ) ) {
 					foreach ( $flattener( $node['childs'] ) as $child_id => $child ) {
-						$child['path']             = array_merge( $node['path'], $child['path'] );
-						$child['controller_class'] = array_merge( $node['controller_class'], $child['controller_class'] );
+						$child['path'] = array_merge( $node['path'], $child['path'] );
+
+						$child['controller_class'] = array_merge(
+							$node['controller_class'],
+							$child['controller_class']
+						);
 
 						yield "{$node_id}-{$child_id}" => $child;
 					}

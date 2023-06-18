@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\Web\Router;
 
 
@@ -32,7 +33,7 @@ class Router {
 		string $path,
 		string|callable $controller,
 		array $options = []
-	): void {
+	) : void {
 
 		$name         = $options['name'] ?? 'route-' . count( $this->routes );
 		$requirements = $options['requirements'] ?? [];
@@ -64,7 +65,7 @@ class Router {
 	public function findMatch(
 		string $path,
 		string $method = null
-	): array {
+	) : array {
 
 		$route = null;
 
@@ -76,16 +77,16 @@ class Router {
 			$temp = $this->routes[ $route_name ];
 
 			if ( $temp['path'] === $path ) {
-				$route               = $temp;
+				$route = $temp;
+
 				$route['parameters'] = [];
 
 			} else if ( isset( $temp['path_regexp'] ) && preg_match( $temp['path_regexp'], $path, $matches ) ) {
-				$route               = $temp;
+				$route = $temp;
+
 				$route['parameters'] = array_filter(
 					array_slice( array_filter( $matches ), 1 ),
-					function ( $k ) {
-						return ! is_int( $k );
-					},
+					fn ( $k ) => ! is_int( $k ),
 					ARRAY_FILTER_USE_KEY
 				);
 			}
@@ -103,7 +104,7 @@ class Router {
 	public function pathFor(
 		string $route_name,
 		array $parameters = null
-	): string {
+	) : string {
 
 		$route = $this->routes[ $route_name ];
 		$path  = $route['path'];
@@ -112,20 +113,17 @@ class Router {
 			// replace parameters values
 			if ( is_array( $parameters ) && count( $parameters ) > 0 ) {
 				$placeholders = array_map(
-					function ( $k ) {
-						return "{{$k}}";
-					},
+					fn ( $k ) => "{{$k}}",
 					array_keys( $parameters )
 				);
-				$path         = str_replace( $placeholders, array_values( $parameters ), $route['path'] );
+
+				$path = str_replace( $placeholders, array_values( $parameters ), $route['path'] );
 			}
 
 			// clear optional parameters
 			$path = preg_replace_callback(
 				'/\[([^\]]+)\]/',
-				function ( $matches ) {
-					return preg_match( '/{.*}/', $matches[1] ) ? '' : $matches[1];
-				},
+				fn ( $m ) => preg_match( '/{.*}/', $m[1] ) ? '' : $m[1],
 				$path
 			);
 		}
@@ -139,7 +137,7 @@ class Router {
 		array $parameters = null,
 		array $getvars = null,
 		bool $include_prefix = true
-	): string {
+	) : string {
 
 		$url = $this->pathFor( $route_name, $parameters );
 
@@ -155,12 +153,12 @@ class Router {
 	}
 
 
-	public function import( array $data ): void {
+	public function import( array $data ) : void {
 		[ $this->routes, $this->routes_methods ] = $data;
 	}
 
 
-	public function export(): array {
+	public function export() : array {
 		return [ $this->routes, $this->routes_methods ];
 	}
 
@@ -172,7 +170,7 @@ class Router {
 		string $path,
 		array $requirements,
 		array $constraints
-	): array {
+	) : array {
 
 		$requirements = array_merge( self::REQUIREMENTS, $requirements );
 
@@ -183,12 +181,12 @@ class Router {
 		$path_regexp = preg_replace_callback(
 			'/{(?<name>\w+)(:(?<requirement>[^}]+))?}/',
 			function (
-			$matches
+				$matches
 			) use (
-			&$parameters,
-			&$paramnames,
-			&$requirements,
-			&$constraints
+				&$parameters,
+				&$paramnames,
+				&$requirements,
+				&$constraints
 			) {
 
 				$placeholder = sprintf( '`%s`', count( $parameters ) );
@@ -226,9 +224,7 @@ class Router {
 		// change optional blocks format
 		$path_regexp = preg_replace_callback(
 			'/\[([^\]]+)\]/',
-			function ( $matches ) {
-				return sprintf( '~%s~', $matches[1] );
-			},
+			fn ( $matches ) => sprintf( '~%s~', $matches[1] ),
 			$path_regexp
 		);
 
@@ -244,15 +240,18 @@ class Router {
 		// fix optional blocks
 		$path_regexp = preg_replace_callback(
 			'/~([^~]+)~/',
-			function ( $matches ) {
-				return sprintf( '(?|%s)?', $matches[1] );
-			},
+			fn ( $matches ) => sprintf( '(?|%s)?', $matches[1] ),
 			$path_regexp
 		);
 
 
 		// build regex
-		$path_regexp = sprintf( '%s^%s$%s', $regexp_delimiter, $path_regexp, $regexp_delimiter );
+		$path_regexp = sprintf(
+			'%s^%s$%s',
+			$regexp_delimiter,
+			$path_regexp,
+			$regexp_delimiter
+		);
 
 
 		// --

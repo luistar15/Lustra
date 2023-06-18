@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra;
 
 
@@ -13,7 +14,7 @@ class Config {
 	private array $config = [];
 
 
-	public function loadIniFile( string $file ): void {
+	public function loadIniFile( string $file ) : void {
 		$data = parse_ini_file( $file, true, INI_SCANNER_TYPED );
 
 		if ( $data === false ) {
@@ -24,21 +25,7 @@ class Config {
 	}
 
 
-	public function loadEnv(
-		string $folder,
-		string $env
-	): void {
-
-		$this->loadIniFile( "{$folder}/config.base.ini" );
-		$this->loadIniFile( "{$folder}/config.{$env}.ini" );
-	}
-
-
-	public function exists(
-		string $section,
-		string $key
-	): bool {
-
+	public function exists( string $section, string $key ) : bool {
 		return isset( $this->config[ $section ][ $key ] );
 	}
 
@@ -48,7 +35,7 @@ class Config {
 		string $key,
 		mixed $default = null,
 		array $placeholders = []
-	): mixed {
+	) : mixed {
 
 		$value = $this->config[ $section ][ $key ] ?? $default;
 
@@ -64,7 +51,7 @@ class Config {
 	}
 
 
-	public function replacePlaceholders( array $placeholders = [] ): void {
+	public function replacePlaceholders( array $placeholders = [] ) : void {
 		if ( count( $placeholders ) > 0 ) {
 			foreach ( $this->config as $section => $values ) {
 				foreach ( $values as $k => $v ) {
@@ -80,10 +67,10 @@ class Config {
 	private static function replacePlaceholdersInValue(
 		string $value,
 		array $placeholders
-	): string {
+	) : string {
 
 		$value = str_replace(
-			array_map( fn ( $k) => '{' . $k . '}', array_keys( $placeholders ) ),
+			array_map( fn ( $k) => "{{$k}}", array_keys( $placeholders ) ),
 			array_values( $placeholders ),
 			$value
 		);

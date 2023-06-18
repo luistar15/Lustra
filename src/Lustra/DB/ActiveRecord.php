@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\DB;
 
 
@@ -21,24 +22,24 @@ abstract class ActiveRecord {
 	}
 
 
-	public function set( string $k, mixed $v ): void {
+	public function set( string $k, mixed $v ) : void {
 		$this->data[ $k ] = $v;
 	}
 
 
-	public function get( string $k ): mixed {
+	public function get( string $k ) : mixed {
 		return $this->data[ $k ] ?? null;
 	}
 
 
-	public function setData( iterable $data ): void {
+	public function setData( iterable $data ) : void {
 		foreach ( $data as $k => $v ) {
 			$this->data[ $k ] = $v;
 		}
 	}
 
 
-	public function getData( array $columns = [] ): array {
+	public function getData( array $columns = [] ) : array {
 		if ( count( $columns ) === 0 ) {
 			return $this->data;
 		}
@@ -53,17 +54,17 @@ abstract class ActiveRecord {
 	}
 
 
-	public function getPk(): ?string {
+	public function getPk() : ?string {
 		return $this->data[ $this->pk ] ?? null;
 	}
 
 
-	public function setPk( ?string $pk ): void {
+	public function setPk( ?string $pk ) : void {
 		$this->data[ $this->pk ] = $pk;
 	}
 
 
-	public function exists(): bool {
+	public function exists() : bool {
 		return boolval( $this->getPk() );
 	}
 
@@ -74,7 +75,7 @@ abstract class ActiveRecord {
 	public function load(
 		array $query,
 		array $bindings = []
-	): array {
+	) : array {
 
 		$query = array_merge( $query, [ 'LIMIT' => '1' ] );
 
@@ -95,7 +96,7 @@ abstract class ActiveRecord {
 	public function loadByColumn(
 		string $column,
 		string $value
-	): array {
+	) : array {
 
 		return $this->load(
 			[ 'WHERE' => "`{$column}` = :_VAL_" ],
@@ -104,7 +105,7 @@ abstract class ActiveRecord {
 	}
 
 
-	public function loadByPk( string $pk ): array {
+	public function loadByPk( string $pk ) : array {
 		return $this->loadByColumn( $this->pk, $pk );
 	}
 
@@ -112,7 +113,7 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function save( array $columns = [] ): void {
+	public function save( array $columns = [] ) : void {
 		$data = $this->getData( $columns );
 
 		if ( $this->exists() ) {
@@ -130,7 +131,7 @@ abstract class ActiveRecord {
 	}
 
 
-	public function delete(): void {
+	public function delete() : void {
 		$this->db->delete(
 			$this->table,
 			[ 'WHERE' => sprintf( '`%s` = :pk', $this->pk ) ],
@@ -143,14 +144,17 @@ abstract class ActiveRecord {
 
 
 	public function find(
-		array $query,
+		array $query = [],
 		array $bindings = []
-	): array {
+	) : array {
 
 		$query = array_merge( $query, [ 'FROM' => $this->table ] );
 
 		if ( isset( $query['JOIN'] ) ) {
-			$query['JOIN'] = SQLBuilder::parseJoins( $query['JOIN'], $this->relations );
+			$query['JOIN'] = SQLBuilder::parseJoins(
+				$query['JOIN'],
+				$this->relations
+			);
 		}
 
 		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
@@ -161,7 +165,7 @@ abstract class ActiveRecord {
 	}
 
 
-	public function getDb(): DBAL {
+	public function getDb() : DBAL {
 		return $this->db;
 	}
 

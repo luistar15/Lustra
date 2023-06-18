@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\CLI;
 
 
@@ -17,6 +18,9 @@ class Arguments {
 
 
 	/*
+	 * USAGE:
+	 * ------
+	 *
 	 * new CliArguments([
 	 *  'param_a'=> [
 	 *    'key'         => '--option',
@@ -59,7 +63,7 @@ class Arguments {
 	public function parse(
 		array $args,
 		bool $show_usage_on_error = true
-	): array {
+	) : array {
 
 		$parsed     = [];
 		$positional = [];
@@ -152,7 +156,7 @@ class Arguments {
 	}
 
 
-	public function displayUsage( string $header = '' ): void {
+	public function displayUsage( string $header = '' ) : void {
 		$named_params      = [];
 		$positional_params = [];
 
@@ -255,15 +259,17 @@ class Arguments {
 	}
 
 
-	public function displayUsageError( string $error_message ): void {
-		$this->displayUsage( "\e[41mERROR:\e[0m\n  \e[36m{$error_message}\e[0m" );
+	public function displayUsageError( string $error_message ) : void {
+		$this->displayUsage(
+			"\e[41mERROR:\e[0m\n  \e[36m{$error_message}\e[0m"
+		);
 	}
 
 
 	// -------------------------------------------------------------------------
 
 
-	private function findParamByKey( string $key ): ?array {
+	private function findParamByKey( string $key ) : ?array {
 		foreach ( $this->params as $param ) {
 			if ( is_string( $param['key'] ) ) {
 				if ( $key === $param['key'] ) {
@@ -279,7 +285,7 @@ class Arguments {
 	}
 
 
-	private static function parseParams( array $params ): array {
+	private static function parseParams( array $params ) : array {
 		$rules = [];
 
 		foreach ( $params as $k => $param ) {
@@ -309,7 +315,10 @@ class Arguments {
 	}
 
 
-	private static function parseArgument( array $args, int $i ): array {
+	/**
+	 * @param string[] $args
+	 */
+	private static function parseArgument( array $args, int $i ) : array {
 		if ( isset( $args[ $i ] ) ) {
 			$is_key = preg_match( '/^(-\w|--[\w\-]+)$/i', $args[ $i ] );
 			return $is_key ? [ $args[ $i ], null ] : [ null, $args[ $i ] ];
@@ -325,7 +334,7 @@ class Arguments {
 	private static function printTable(
 		string $title,
 		array $rows
-	): void {
+	) : void {
 
 		if ( count( $rows ) === 0 ) {
 			return;
@@ -335,12 +344,7 @@ class Arguments {
 
 		foreach ( $rows[0] as $i => $col ) {
 			$col_widths[ $i ] = max(
-				array_map(
-					function ( $s ) {
-						return strlen( $s );
-					},
-					array_column( $rows, $i )
-				)
+				array_map( 'strlen', array_column( $rows, $i ) )
 			);
 		}
 

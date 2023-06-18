@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\DB;
 
 
@@ -31,7 +32,7 @@ class DBAL extends PDO {
 	}
 
 
-	public function connect(): void {
+	public function connect() : void {
 		if ( $this->is_connected ) {
 			return;
 		}
@@ -47,7 +48,7 @@ class DBAL extends PDO {
 	public function execute(
 		string $sql,
 		array $bindings = []
-	): PDOStatement {
+	) : PDOStatement {
 
 		$this->connect();
 
@@ -63,14 +64,14 @@ class DBAL extends PDO {
 
 
 	// SELECT shortcuts
-	// ------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 
 	public function getRows(
 		string $sql,
 		array $bindings = [],
 		int $fetch_type = PDO::FETCH_ASSOC
-	): array {
+	) : array {
 
 		$sth  = $this->execute( $sql, $bindings );
 		$rows = $sth->fetchAll( $fetch_type );
@@ -84,7 +85,7 @@ class DBAL extends PDO {
 		string $sql,
 		array $bindings = [],
 		int $fetch_type = PDO::FETCH_ASSOC
-	): array {
+	) : array {
 
 		$sth = $this->execute( $sql, $bindings );
 		$row = $sth->fetch( $fetch_type );
@@ -102,7 +103,7 @@ class DBAL extends PDO {
 		string $sql,
 		array $bindings = [],
 		int $column_number = 0
-	): array {
+	) : array {
 
 		$sth    = $this->execute( $sql, $bindings );
 		$column = $sth->fetchAll( PDO::FETCH_COLUMN, $column_number );
@@ -116,7 +117,7 @@ class DBAL extends PDO {
 		string $sql,
 		array $bindings = [],
 		int $column_number = 0
-	): ?string {
+	) : ?string {
 
 		$sth = $this->execute( $sql, $bindings );
 		$val = $sth->fetchColumn( $column_number );
@@ -137,7 +138,7 @@ class DBAL extends PDO {
 		string $sql,
 		array $bindings = [],
 		int $fetch_type = PDO::FETCH_ASSOC
-	): Iterator {
+	) : Iterator {
 
 		$sth = $this->execute( $sql, $bindings );
 
@@ -153,7 +154,7 @@ class DBAL extends PDO {
 		string $sql,
 		array $bindings = [],
 		int $column_number = 0
-	): Iterator {
+	) : Iterator {
 
 		$sth = $this->execute( $sql, $bindings );
 
@@ -167,13 +168,13 @@ class DBAL extends PDO {
 
 
 	// INSERT (single row)
-	// ------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 
 	public function insert(
 		string $table,
 		array $data
-	): int {
+	) : int {
 
 		$columns     = [];
 		$placehoders = [];
@@ -199,7 +200,7 @@ class DBAL extends PDO {
 
 
 	// UPDATE
-	// ------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 
 	public function update(
@@ -207,12 +208,13 @@ class DBAL extends PDO {
 		array $data,
 		array $conditions = [],
 		array $bindings = []
-	): int {
+	) : int {
 
 		$columns = [];
 
 		foreach ( $data as $k => $v ) {
-			$columns[]           = "{$k} = :{$k}";
+			$columns[] = "{$k} = :{$k}";
+
 			$bindings[ ":{$k}" ] = $v;
 		}
 
@@ -220,7 +222,10 @@ class DBAL extends PDO {
 
 		if ( count( $conditions ) ) {
 			$sql .= ' WHERE ';
-			$sql .= implode( ' AND ', array_map( fn ( $c) => "({$c})", $conditions ) );
+			$sql .= implode(
+				' AND ',
+				array_map( fn ( $c) => "({$c})", $conditions )
+			);
 		}
 
 		$sth = $this->execute( $sql, $bindings );
@@ -231,20 +236,23 @@ class DBAL extends PDO {
 
 
 	// DELETE
-	// ------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 
 	public function delete(
 		string $table,
 		array $conditions = [],
 		array $bindings = []
-	): int {
+	) : int {
 
 		$sql = "DELETE FROM {$table}";
 
 		if ( count( $conditions ) ) {
 			$sql .= ' WHERE ';
-			$sql .= implode( ' AND ', array_map( fn ( $c) => "({$c})", $conditions ) );
+			$sql .= implode(
+				' AND ',
+				array_map( fn ( $c) => "({$c})", $conditions )
+			);
 		}
 
 		$sth = $this->execute( $sql, $bindings );
@@ -255,10 +263,10 @@ class DBAL extends PDO {
 
 
 	// HELPERS
-	// ------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 
-	public static function getStatementColumns( PDOStatement $sth ): array {
+	public static function getStatementColumns( PDOStatement $sth ) : array {
 		$columns = [];
 
 		$count = $sth->columnCount();
@@ -274,7 +282,7 @@ class DBAL extends PDO {
 	public static function bindValues(
 		PDOStatement $sth,
 		array $bindings = []
-	): void {
+	) : void {
 
 		$question_mark_position = 0;
 
@@ -298,7 +306,7 @@ class DBAL extends PDO {
 	}
 
 
-	private static function inferDataType( string $type ): int {
+	private static function inferDataType( string $type ) : int {
 		// phpcs:disable
 		switch ( $type ) {
 			case 'string'  : return PDO::PARAM_STR;

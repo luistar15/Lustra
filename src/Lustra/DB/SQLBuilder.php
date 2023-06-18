@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 namespace Lustra\DB;
 
 
@@ -10,8 +11,7 @@ use Exception;
 
 class SQLBuilder {
 
-	public static function build( array $query ): string {
-
+	public static function build( array $query ) : string {
 		$query = array_merge(
 			[
 				'DISTINCT' => false,
@@ -82,7 +82,7 @@ class SQLBuilder {
 	public static function parseJoins(
 		array $joins,
 		array $relations = []
-	): array {
+	) : array {
 
 		$parsed = [];
 
