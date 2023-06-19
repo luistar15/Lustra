@@ -266,7 +266,10 @@ class DBAL extends PDO {
 	// -------------------------------------------------------------------------
 
 
-	public static function getStatementColumns( PDOStatement $sth ) : array {
+	public static function getStatementColumns(
+		PDOStatement $sth
+	) : array {
+
 		$columns = [];
 
 		$count = $sth->columnCount();
@@ -306,7 +309,10 @@ class DBAL extends PDO {
 	}
 
 
-	private static function inferDataType( string $type ) : int {
+	private static function inferDataType(
+		string $type
+	) : int {
+
 		// phpcs:disable
 		switch ( $type ) {
 			case 'string'  : return PDO::PARAM_STR;

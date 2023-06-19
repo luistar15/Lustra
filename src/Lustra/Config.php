@@ -14,7 +14,10 @@ class Config {
 	private array $config = [];
 
 
-	public function loadIniFile( string $file ) : void {
+	public function loadIniFile(
+		string $file
+	) : void {
+
 		$data = parse_ini_file( $file, true, INI_SCANNER_TYPED );
 
 		if ( $data === false ) {
@@ -25,7 +28,11 @@ class Config {
 	}
 
 
-	public function exists( string $section, string $key ) : bool {
+	public function exists(
+		string $section,
+		string $key
+	) : bool {
+
 		return isset( $this->config[ $section ][ $key ] );
 	}
 
@@ -51,7 +58,10 @@ class Config {
 	}
 
 
-	public function replacePlaceholders( array $placeholders = [] ) : void {
+	public function replacePlaceholders(
+		array $placeholders = []
+	) : void {
+
 		if ( count( $placeholders ) > 0 ) {
 			foreach ( $this->config as $section => $values ) {
 				foreach ( $values as $k => $v ) {

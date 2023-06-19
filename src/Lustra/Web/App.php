@@ -78,7 +78,10 @@ class App {
 	}
 
 
-	public function instantiateService( string $class ) : object {
+	public function instantiateService(
+		string $class
+	) : object {
+
 		if ( ! class_exists( $class ) ) {
 			throw new InvalidArgumentException(
 				"'{$class}' argument is not a valid ClassName",
@@ -170,7 +173,10 @@ class App {
 	}
 
 
-	private function getReflectionClass( ReflectionParameter $parameter ) : ?ReflectionClass {
+	private function getReflectionClass(
+		ReflectionParameter $parameter
+	) : ?ReflectionClass {
+
 		$type = $parameter->getType();
 
 		if ( is_null( $type ) ) {
@@ -193,17 +199,28 @@ class App {
 	}
 
 
-	public function setTemplateDir( string $path ) : void {
+	public function setTemplateDir(
+		string $path
+	) : void {
+
 		$this->template_dir = $path;
 	}
 
 
-	public function getTemplatePath( string $filename, string $ext = 'php' ) : string {
+	public function getTemplatePath(
+		string $filename,
+		string $ext = 'php'
+	) : string {
+
 		return "{$this->template_dir}/{$filename}.{$ext}";
 	}
 
 
-	public function render( string $path, array &$data = null ) : void {
+	public function render(
+		string $path,
+		array &$data = null
+	) : void {
+
 		if ( is_array( $data ) ) {
 			extract( $data, EXTR_REFS ); // phpcs:ignore
 		}
@@ -214,7 +231,11 @@ class App {
 	}
 
 
-	public static function redirect( string $url, int $code = 302 ) : void {
+	public static function redirect(
+		string $url,
+		int $code = 302
+	) : void {
+
 		header( "Location: {$url}", true, $code );
 		exit;
 	}

@@ -24,7 +24,10 @@ class Router {
 	];
 
 
-	public function __construct( string $path_prefix = '/' ) {
+	public function __construct(
+		string $path_prefix = '/'
+	) {
+
 		$this->path_prefix = $path_prefix;
 	}
 
@@ -153,7 +156,10 @@ class Router {
 	}
 
 
-	public function import( array $data ) : void {
+	public function import(
+		array $data
+	) : void {
+
 		[ $this->routes, $this->routes_methods ] = $data;
 	}
 
@@ -256,6 +262,16 @@ class Router {
 
 		// --
 		return compact( 'path', 'path_regexp' );
+	}
+
+
+	public function getDebugInfo() : array {
+		return [
+			'$path_prefix'    => $this->path_prefix,
+			'$routes'         => $this->routes,
+			'$routes_methods' => $this->routes_methods,
+			'REQUIREMENTS'    => self::REQUIREMENTS,
+		];
 	}
 
 }

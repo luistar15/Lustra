@@ -77,7 +77,10 @@ final class RouterFactory {
 	}
 
 
-	public static function fixRoutesTree( array $tree ) : array {
+	public static function fixRoutesTree(
+		array $tree
+	) : array {
+
 		$camel_case = function ( $str ) {
 			return strtr(
 				ucwords( preg_replace( '/[^a-z0-9]+/i', ' ', strtolower( $str ) ) ),
@@ -176,7 +179,10 @@ final class RouterFactory {
 	}
 
 
-	public static function flattenRoutesTree( array $tree ) : array {
+	public static function flattenRoutesTree(
+		array $tree
+	) : array {
+
 		$flatten = [];
 
 		$flattener = function ( array $nodes ) use ( &$flattener ) : iterable {

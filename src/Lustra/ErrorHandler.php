@@ -45,7 +45,10 @@ class ErrorHandler {
 	}
 
 
-	public function setHandler( callable $handler ) : void {
+	public function setHandler(
+		callable $handler
+	) : void {
+
 		$this->handler = $handler;
 	}
 
@@ -65,7 +68,10 @@ class ErrorHandler {
 	}
 
 
-	public function handleException( Throwable $exception ) : void {
+	public function handleException(
+		Throwable $exception
+	) : void {
+
 		if ( $this->debug ) {
 			if ( ob_get_length() ) {
 				ob_clean();
@@ -102,7 +108,10 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionHtml( Throwable $exception ) : void {
+	private static function dumpExceptionHtml(
+		Throwable $exception
+	) : void {
+
 		$html = sprintf(
 			"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
 			htmlspecialchars( get_class( $exception ) ),
@@ -148,7 +157,10 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionCli( Throwable $exception ) : void {
+	private static function dumpExceptionCli(
+		Throwable $exception
+	) : void {
+
 		$color = function ( $str, $code ) {
 			return "\e[{$code}m{$str}\e[0m";
 		};

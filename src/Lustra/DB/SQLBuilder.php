@@ -11,7 +11,10 @@ use Exception;
 
 class SQLBuilder {
 
-	public static function build( array $query ) : string {
+	public static function build(
+		array $query
+	) : string {
+
 		$query = array_merge(
 			[
 				'DISTINCT' => false,

@@ -17,29 +17,45 @@ abstract class ActiveRecord {
 	protected array $data      = [];
 
 
-	public function __construct( DBAL $db ) {
+	public function __construct(
+		DBAL $db
+	) {
+
 		$this->db = $db;
 	}
 
 
-	public function set( string $k, mixed $v ) : void {
+	public function set(
+		string $k,
+		mixed $v
+	) : void {
+
 		$this->data[ $k ] = $v;
 	}
 
 
-	public function get( string $k ) : mixed {
+	public function get(
+		string $k
+	) : mixed {
+
 		return $this->data[ $k ] ?? null;
 	}
 
 
-	public function setData( iterable $data ) : void {
+	public function setData(
+		iterable $data
+	) : void {
+
 		foreach ( $data as $k => $v ) {
 			$this->data[ $k ] = $v;
 		}
 	}
 
 
-	public function getData( array $columns = [] ) : array {
+	public function getData(
+		array $columns = []
+	) : array {
+
 		if ( count( $columns ) === 0 ) {
 			return $this->data;
 		}
@@ -59,7 +75,10 @@ abstract class ActiveRecord {
 	}
 
 
-	public function setPk( ?string $pk ) : void {
+	public function setPk(
+		?string $pk
+	) : void {
+
 		$this->data[ $this->pk ] = $pk;
 	}
 
@@ -105,7 +124,10 @@ abstract class ActiveRecord {
 	}
 
 
-	public function loadByPk( string $pk ) : array {
+	public function loadByPk(
+		string $pk
+	) : array {
+
 		return $this->loadByColumn( $this->pk, $pk );
 	}
 
@@ -113,7 +135,10 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function save( array $columns = [] ) : void {
+	public function save(
+		array $columns = []
+	) : void {
+
 		$data = $this->getData( $columns );
 
 		if ( $this->exists() ) {
