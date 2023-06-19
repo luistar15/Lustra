@@ -10,6 +10,7 @@ use Lustra\Container;
 use Lustra\Web\Router\Router;
 
 use Closure;
+use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
@@ -208,16 +209,28 @@ class App {
 
 
 	public function getTemplatePath(
-		string $filename,
+		string|array $filenames,
 		string $ext = 'php'
 	) : string {
 
-		return "{$this->template_dir}/{$filename}.{$ext}";
+		if ( is_string( $filenames ) ) {
+			$filenames = [ $filenames ];
+		}
+
+		foreach ( $filenames as $filename ) {
+			$file = "{$this->template_dir}/{$filename}.{$ext}";
+
+			if ( is_file( $file ) ) {
+				return $file;
+			}
+		}
+
+		throw new Exception( 'Missing template for ' . json_encode( $filenames ) );
 	}
 
 
 	public function render(
-		string $path,
+		string|array $path,
 		array &$data = null
 	) : void {
 
