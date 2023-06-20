@@ -12,7 +12,7 @@ use ErrorException;
 
 class ErrorHandler {
 
-	private bool $debug;
+	private bool $debug = true;
 
 	/** @var ?callable $handler */
 	private $handler = null;

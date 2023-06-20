@@ -11,10 +11,10 @@ use Exception;
 
 class Config {
 
-	private array $config = [];
+	private array $data = [];
 
 
-	public function loadIniFile(
+	public function loadIni(
 		string $file
 	) : void {
 
@@ -24,37 +24,81 @@ class Config {
 			throw new Exception( "Error parsing ini file: {$file}" );
 		}
 
-		$this->config = array_replace_recursive( $this->config, $data );
+		$this->data = array_replace_recursive( $this->data, $data );
+	}
+
+
+	public function loadEnv(
+		array $map
+	) : void {
+
+		foreach ( $map as $section => $vars ) {
+			foreach ( $vars as $var => $key ) {
+				$value = getenv( $var );
+
+				if ( $value === false ) {
+					continue;
+				}
+
+				$value_lower = strtolower( $value );
+
+				if ( $value_lower === 'null' ) {
+					$value = null;
+
+				} else if ( in_array( $value_lower, [ 'true', 'on', 'yes' ], true ) ) {
+					$value = true;
+
+				} else if ( in_array( $value_lower, [ 'false', 'off', 'no', 'none' ], true ) ) {
+					$value = false;
+				}
+
+				$this->set( $key, $value, $section );
+			}
+		}
 	}
 
 
 	public function exists(
-		string $section,
-		string $key
+		string $key,
+		string $section = 'global'
 	) : bool {
 
-		return isset( $this->config[ $section ][ $key ] );
+		return isset( $this->data[ $section ][ $key ] );
 	}
 
 
 	public function get(
-		string $section,
 		string $key,
+		string $section = 'global',
 		mixed $default = null,
 		array $placeholders = []
 	) : mixed {
 
-		$value = $this->config[ $section ][ $key ] ?? $default;
-
-		if ( is_null( $value ) ) {
+		if ( ! isset( $this->data[ $section ][ $key ] ) && is_null( $default ) ) {
 			throw new Exception( self::class . " [$section][$key] was not found" );
 		}
 
-		if ( count( $placeholders ) > 0 ) {
+		$value = $this->data[ $section ][ $key ] ?? $default;
+
+		if ( is_string( $value) && count( $placeholders ) > 0 ) {
 			$value = self::replacePlaceholdersInValue( $value, $placeholders );
 		}
 
 		return $value;
+	}
+
+
+	public function set(
+		string $key,
+		mixed $value,
+		string $section = 'global'
+	) : void {
+
+		if ( ! isset( $this->data[ $section ] ) ) {
+			$this->data[ $section ] = [];
+		}
+
+		$this->data[ $section ][ $key ] = $value;
 	}
 
 
@@ -63,10 +107,10 @@ class Config {
 	) : void {
 
 		if ( count( $placeholders ) > 0 ) {
-			foreach ( $this->config as $section => $values ) {
+			foreach ( $this->data as $section => $values ) {
 				foreach ( $values as $k => $v ) {
 					if ( is_string( $v ) ) {
-						$this->config[ $section ][ $k ] = self::replacePlaceholdersInValue( $v, $placeholders );
+						$this->data[ $section ][ $k ] = self::replacePlaceholdersInValue( $v, $placeholders );
 					}
 				}
 			}
@@ -79,13 +123,24 @@ class Config {
 		array $placeholders
 	) : string {
 
-		$value = str_replace(
+		return str_replace(
 			array_map( fn ( $k) => "{{$k}}", array_keys( $placeholders ) ),
 			array_values( $placeholders ),
 			$value
 		);
+	}
 
-		return $value;
+
+	public function getDebugInfo() : array {
+		$info = [];
+
+		foreach ( $this->data as $section => $values ) {
+			foreach ( $values as $key => $value ) {
+				$info[ "[{$section}] {$key}" ] = $value;
+			}
+		}
+
+		return $info;
 	}
 
 }
