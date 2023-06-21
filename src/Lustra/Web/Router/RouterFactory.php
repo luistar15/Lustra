@@ -9,6 +9,7 @@ namespace Lustra\Web\Router;
 final class RouterFactory {
 
 	public static function build(
+		string $host,
 		string $path_prefix,
 		string $routes_config_file,
 		?string $cache_file = null,
@@ -16,7 +17,7 @@ final class RouterFactory {
 		string $controller_suffix = 'Controller'
 	) : Router {
 
-		$router = new Router( $path_prefix );
+		$router = new Router( $host, $path_prefix );
 
 		if ( is_string( $cache_file ) && is_file( $cache_file ) ) {
 			$router->import( require $cache_file );

@@ -8,6 +8,7 @@ namespace Lustra\Web\Router;
 
 class Router {
 
+	private string $host;
 	private string $path_prefix;
 
 	private array $routes         = [];
@@ -25,9 +26,11 @@ class Router {
 
 
 	public function __construct(
+		string $host = '',
 		string $path_prefix = '/'
 	) {
 
+		$this->host        = $host;
 		$this->path_prefix = $path_prefix;
 	}
 
@@ -106,7 +109,7 @@ class Router {
 
 	public function pathFor(
 		string $route_name,
-		array $parameters = null
+		array $parameters = []
 	) : string {
 
 		$route = $this->routes[ $route_name ];
@@ -114,7 +117,7 @@ class Router {
 
 		if ( isset( $route['path_regexp'] ) ) {
 			// replace parameters values
-			if ( is_array( $parameters ) && count( $parameters ) > 0 ) {
+			if ( count( $parameters ) > 0 ) {
 				$placeholders = array_map(
 					fn ( $k ) => "{{$k}}",
 					array_keys( $parameters )
@@ -137,22 +140,43 @@ class Router {
 
 	public function urlFor(
 		string $route_name,
-		array $parameters = null,
-		array $getvars = null,
-		bool $include_prefix = true
+		array $parameters = [],
+		array $getvars = [],
+		bool $include_prefix = true,
+		bool $include_host = false
 	) : string {
 
 		$url = $this->pathFor( $route_name, $parameters );
 
-		if ( $include_prefix ) {
+		if ( $include_host || $include_prefix ) {
 			$url = $this->path_prefix . $url;
 		}
 
-		if ( is_array( $getvars ) && count( $getvars ) > 0 ) {
+		if ( count( $getvars ) > 0 ) {
 			$url .= '?' . http_build_query( $getvars );
 		}
 
+		if ( $include_host ) {
+			$url = $this->host . $url;
+		}
+
 		return $url;
+	}
+
+
+	public function fullUrlFor(
+		string $route_name,
+		array $parameters = [],
+		array $getvars = []
+	) : string {
+
+		return $this->urlFor(
+			$route_name,
+			$parameters,
+			$getvars,
+			true,
+			true
+		);
 	}
 
 

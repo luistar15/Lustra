@@ -33,7 +33,7 @@ class Config {
 	) : void {
 
 		foreach ( $map as $section => $vars ) {
-			foreach ( $vars as $var => $key ) {
+			foreach ( $vars as $key => $var ) {
 				$value = getenv( $var );
 
 				if ( $value === false ) {

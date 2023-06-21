@@ -67,9 +67,7 @@ class Container {
 		$entries = [];
 
 		foreach ( $this->store as $k => $v ) {
-			if ( isset( $this->builders[ $k ] ) ) {
-				$entries[ $k ] = strval( new ReflectionFunction( $this->builders[ $k ] ) );
-			} else if ( is_object( $v ) ) {
+			if ( is_object( $v ) ) {
 				$entries[ $k ] = 'Object: ' . get_class( $v );
 			} else {
 				$entries[ $k ] = $v;
