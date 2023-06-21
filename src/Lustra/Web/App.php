@@ -232,15 +232,17 @@ class App {
 	public function render(
 		string|array $path,
 		array &$data = null
-	) : void {
+	) : string {
 
 		if ( is_array( $data ) ) {
 			extract( $data, EXTR_REFS ); // phpcs:ignore
 		}
 
 		ob_start();
+
 		require $this->getTemplatePath( $path );
-		ob_end_flush();
+
+		return ob_get_clean() ?: '';
 	}
 
 
