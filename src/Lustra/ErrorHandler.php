@@ -72,21 +72,11 @@ class ErrorHandler {
 		Throwable $exception
 	) : void {
 
-		if ( $this->debug ) {
-			if ( ob_get_length() ) {
-				ob_clean();
-			}
-
-			if ( PHP_SAPI === 'cli' ) {
-				self::dumpExceptionCli( $exception );
-			} else {
-				self::dumpExceptionHtml( $exception );
-			}
-
-			exit;
-
-		} else if ( is_callable( $this->handler ) ) {
+		if ( is_callable( $this->handler ) ) {
 			call_user_func( $this->handler, $exception );
+
+		} else if ( $this->debug ) {
+			$this->dumpException( $exception );
 
 		} else {
 			header( 'HTTP/1.1 500 Internal Server Error', true );
@@ -108,17 +98,56 @@ class ErrorHandler {
 	}
 
 
-	private static function dumpExceptionHtml(
+	public function dumpException(
 		Throwable $exception
 	) : void {
 
-		$html = sprintf(
-			"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
-			htmlspecialchars( get_class( $exception ) ),
-			htmlspecialchars( trim( $exception->getMessage() ) ),
-			htmlspecialchars( $exception->getFile() ),
-			$exception->getLine()
-		);
+		if ( ob_get_length() ) {
+			ob_clean();
+		}
+
+		if ( PHP_SAPI === 'cli' ) {
+			self::dumpExceptionCli( $exception );
+		} else {
+			self::dumpExceptionHtml( $exception );
+		}
+
+		exit;
+	}
+
+
+	public static function formatExceptionHtml(
+		Throwable $exception
+	) : string {
+
+		$message      = trim( $exception->getMessage() );
+		$message_json = json_decode( $message );
+
+		if ( json_last_error() === 0 ) {
+			$message_json = json_encode(
+				$message_json,
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+			);
+		}
+
+		if ( is_string( $message_json ) ) {
+			$html = sprintf(
+				"\n\n<p><b>%s:</b><br><pre>%s</pre><br>\n<code>%s (%s)</code></p><hr>\n\n",
+				htmlspecialchars( get_class( $exception ) ),
+				htmlspecialchars( $message_json ),
+				htmlspecialchars( $exception->getFile() ),
+				$exception->getLine()
+			);
+
+		} else {
+			$html = sprintf(
+				"\n\n<p><b>%s:</b> %s <br>\n<code>%s (%s)</code></p><hr>\n\n",
+				htmlspecialchars( get_class( $exception ) ),
+				htmlspecialchars( $message ),
+				htmlspecialchars( $exception->getFile() ),
+				$exception->getLine()
+			);
+		}
 
 		foreach ( $exception->getTrace() as $entry ) {
 			$caller   = '';
@@ -139,10 +168,18 @@ class ErrorHandler {
 			$html .= sprintf( "<div><b>%s</b>{$location}</div><br>\n\n", htmlspecialchars( $caller ) );
 		}
 
-		// -----------------------------
+		return $html;
+	}
+
+
+	private static function dumpExceptionHtml(
+		Throwable $exception
+	) : void {
 
 		header( 'HTTP/1.1 500 Internal Server Error', true );
 		header( 'Content-Type: text/html; charset=UTF-8', true );
+
+		$html = self::formatExceptionHtml( $exception );
 
 		echo <<<HTML
 		<!DOCTYPE html>

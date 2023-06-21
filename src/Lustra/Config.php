@@ -80,7 +80,7 @@ class Config {
 
 		$value = $this->data[ $section ][ $key ] ?? $default;
 
-		if ( is_string( $value) && count( $placeholders ) > 0 ) {
+		if ( is_string( $value ) && count( $placeholders ) > 0 ) {
 			$value = self::replacePlaceholdersInValue( $value, $placeholders );
 		}
 
