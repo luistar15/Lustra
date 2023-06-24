@@ -229,6 +229,11 @@ class App {
 	}
 
 
+	public function getDefaultTemplateFile() : string {
+		return $this->getTemplatePath( $this->route['name'] );
+	}
+
+
 	public function render(
 		string|array $path,
 		array &$data = null

@@ -72,6 +72,10 @@ class ErrorHandler {
 		Throwable $exception
 	) : void {
 
+		if ( ob_get_length() ) {
+			ob_end_clean();
+		}
+
 		if ( is_callable( $this->handler ) ) {
 			call_user_func( $this->handler, $exception );
 
@@ -101,10 +105,6 @@ class ErrorHandler {
 	public function dumpException(
 		Throwable $exception
 	) : void {
-
-		if ( ob_get_length() ) {
-			ob_clean();
-		}
 
 		if ( PHP_SAPI === 'cli' ) {
 			self::dumpExceptionCli( $exception );
