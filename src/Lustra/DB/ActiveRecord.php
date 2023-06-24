@@ -13,15 +13,19 @@ abstract class ActiveRecord {
 	protected string $table = '';
 	protected string $pk    = 'id';
 
-	protected array $relations = [];
-	protected array $data      = [];
+	protected array $data = [];
 
 
 	public function __construct(
-		DBAL $db
+		?DBAL $db = null,
+		array $data = []
 	) {
 
-		$this->db = $db;
+		if ( $db ) {
+			$this->db = $db;
+		}
+
+		$this->setData( $data );
 	}
 
 
@@ -70,7 +74,7 @@ abstract class ActiveRecord {
 	}
 
 
-	public function getPk() : ?string {
+	public function getPk() : int|string|null {
 		return $this->data[ $this->pk ] ?? null;
 	}
 
@@ -96,9 +100,15 @@ abstract class ActiveRecord {
 		array $bindings = []
 	) : array {
 
-		$query = array_merge( $query, [ 'LIMIT' => '1' ] );
+		$query = array_merge(
+			$query,
+			[
+				'FROM'  => $this->table,
+				'LIMIT' => '1',
+			]
+		);
 
-		$rows = $this->find( $query, $bindings );
+		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
 
 		if ( count( $rows ) === 0 ) {
 			throw new RecordNotFoundException(
@@ -114,7 +124,7 @@ abstract class ActiveRecord {
 
 	public function loadByColumn(
 		string $column,
-		string $value
+		int|string $value
 	) : array {
 
 		return $this->load(
@@ -125,7 +135,7 @@ abstract class ActiveRecord {
 
 
 	public function loadByPk(
-		string $pk
+		int|string $pk
 	) : array {
 
 		return $this->loadByColumn( $this->pk, $pk );
@@ -141,8 +151,14 @@ abstract class ActiveRecord {
 
 		$data = $this->getData( $columns );
 
+		unset( $data[ $this->pk ] );
+
 		if ( $this->exists() ) {
-			$this->db->update( $this->table, $data );
+			$this->db->update(
+				$this->table,
+				$data,
+				[ sprintf( '%s = %d', $this->pk, $this->getPk() ) ]
+			);
 
 		} else {
 			$this->db->insert( $this->table, $data );
@@ -168,25 +184,8 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function find(
-		array $query = [],
-		array $bindings = []
-	) : array {
-
-		$query = array_merge( $query, [ 'FROM' => $this->table ] );
-
-		if ( isset( $query['JOIN'] ) ) {
-			$query['JOIN'] = SQLBuilder::parseJoins(
-				$query['JOIN'],
-				$this->relations
-			);
-		}
-
-		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
-
-		if ( is_array( $rows ) ) {
-			return $rows;
-		}
+	public function setDb( DBAL $db ) : void {
+		$this->db = $db;
 	}
 
 
