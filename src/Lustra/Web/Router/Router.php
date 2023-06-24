@@ -116,6 +116,11 @@ class Router {
 		$path  = $route['path'];
 
 		if ( isset( $route['path_regexp'] ) ) {
+			$parameters = array_filter(
+				$parameters,
+				fn ( $val ) => ! in_array( $val, [ null, false, '' ], true )
+			);
+
 			// replace parameters values
 			if ( count( $parameters ) > 0 ) {
 				$placeholders = array_map(
