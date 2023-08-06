@@ -6,6 +6,9 @@ declare(strict_types=1);
 namespace Lustra\Web\Router;
 
 
+use Exception;
+
+
 class Router {
 
 	private string $host;
@@ -87,7 +90,11 @@ class Router {
 
 				$route['parameters'] = [];
 
-			} else if ( isset( $temp['path_regexp'] ) && preg_match( $temp['path_regexp'], $path, $matches ) ) {
+			} else if (
+				isset( $temp['path_regexp'] ) &&
+				preg_match( $temp['path_regexp'], strval( $path ), $matches )
+			) {
+
 				$route = $temp;
 
 				$route['parameters'] = array_filter(
@@ -244,6 +251,9 @@ class Router {
 			$path
 		);
 
+		if ( ! is_string( $path_regexp ) ) {
+			throw new Exception( 'preg_replace_callback error' );
+		}
 
 		if ( count( $parameters ) === 0 ) {
 			return compact( 'path' );
@@ -262,6 +272,10 @@ class Router {
 			fn ( $matches ) => sprintf( '~%s~', $matches[1] ),
 			$path_regexp
 		);
+
+		if ( ! is_string( $path_regexp ) ) {
+			throw new Exception( 'preg_replace_callback error' );
+		}
 
 
 		// escape regex chars

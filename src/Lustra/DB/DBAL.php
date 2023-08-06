@@ -95,7 +95,11 @@ class DBAL extends PDO {
 			throw new Exception( 'PDOStatement::fetch() has failed' );
 		}
 
-		return $row;
+		if ( is_array( $row ) ) {
+			return $row;
+		}
+
+		throw new Exception( 'PDOStatement::fetch() did not return an array' );
 	}
 
 

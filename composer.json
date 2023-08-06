@@ -30,7 +30,7 @@
 		}
 	},
 	"scripts": {
-		"analyze": "./vendor/bin/phpstan analyze -l 7 -c ./.phpstan/config.neon src",
+		"analyze": "./vendor/bin/phpstan analyze -l max -c ./.phpstan/config.neon src",
 		"standards:check": "./vendor/bin/phpcs --standard=./.phpcs/ruleset.xml",
 		"standards:fix": "./vendor/bin/phpcbf --standard=./.phpcs/ruleset.xml"
 	},

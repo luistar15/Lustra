@@ -99,8 +99,16 @@ class Validator {
 			return preg_match( $types[ $type ], $value ) === 1;
 		}
 
-		if ( in_array( $type, [ 'DOMAIN', 'EMAIL', 'IP', 'MAC', 'URL' ], true ) ) {
-			return filter_var( $value, constant( "FILTER_VALIDATE_{$type}" ) );
+		$filters = [
+			'DOMAIN' => FILTER_VALIDATE_DOMAIN,
+			'EMAIL'  => FILTER_VALIDATE_EMAIL,
+			'IP'     => FILTER_VALIDATE_IP,
+			'MAC'    => FILTER_VALIDATE_MAC,
+			'URL'    => FILTER_VALIDATE_URL,
+		];
+
+		if ( isset( $filters[ $type ] ) ) {
+			return filter_var( $value, $filters[ $type ] ) !== false;
 		}
 
 		throw ValidatorException::build(

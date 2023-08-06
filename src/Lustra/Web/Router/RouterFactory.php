@@ -64,13 +64,6 @@ final class RouterFactory {
 		if ( is_string( $cache_file ) && ! is_file( $cache_file ) ) {
 			$data = var_export( $router->export(), true );
 
-			// unnecesary dummy format
-			$data = str_replace( '  ', "\t", $data );                              // spaces to tabs
-			$data = preg_replace( "/=>\s*\n\t*(array\s*\()/m", '=> ${1}', $data ); // same line '=> array'
-			$data = preg_replace( "/(\t)\d+ => /", '${1}', $data );                // remove numeric index
-			$data = str_replace( 'array (', '[', $data );                          // array() to []
-			$data = preg_replace( '/(\n\t*)\)(,|$)/', '${1}]${2}', $data );
-
 			file_put_contents( $cache_file, "<?php return {$data};\n" );
 		}
 
@@ -83,10 +76,8 @@ final class RouterFactory {
 	) : array {
 
 		$camel_case = function ( $str ) {
-			return strtr(
-				ucwords( preg_replace( '/[^a-z0-9]+/i', ' ', strtolower( $str ) ) ),
-				[ ' ' => '' ]
-			);
+			$lower = preg_replace( '/[^a-z0-9]+/i', ' ', strtolower( $str ) );
+			return $lower ? strtr( ucwords( $lower ), [ ' ' => '' ] ) : $str;
 		};
 
 		$lower_camel_case = function ( $str ) use ( &$camel_case ) {
