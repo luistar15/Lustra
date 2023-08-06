@@ -229,8 +229,14 @@ class App {
 	}
 
 
-	public function getDefaultTemplateFile() : string {
-		return $this->getTemplatePath( $this->route['name'] );
+	public function getDefaultTemplateFile( bool $split_dirs = false ) : string {
+		$path = $this->route['name'];
+
+		if ( $split_dirs ) {
+			$path = str_replace( '-', '/', $path );
+		}
+
+		return $this->getTemplatePath( $path );
 	}
 
 
