@@ -240,7 +240,7 @@ class App {
 	}
 
 
-	public function render(
+	public function renderTemplate(
 		string|array $path,
 		array &$data = null
 	) : string {
