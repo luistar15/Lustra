@@ -26,7 +26,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Lustra\\": "src\\Lustra"
+			"Lustra\\": "src"
 		}
 	},
 	"scripts": {
