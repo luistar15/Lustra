@@ -6,6 +6,9 @@ declare(strict_types=1);
 namespace Lustra\DB;
 
 
+use Exception;
+
+
 abstract class ActiveRecord {
 
 	protected DBAL $db;
@@ -43,6 +46,60 @@ abstract class ActiveRecord {
 	) : mixed {
 
 		return $this->data[ $k ] ?? null;
+	}
+
+
+	public function getInt(
+		string $k
+	) : int {
+
+		$value = $this->get( $k );
+
+		if ( is_null( $value ) ) {
+			throw new Exception( "Missing value for [{$k}]" );
+		}
+
+		if ( is_int( $value ) || ( is_string( $value ) && ctype_digit( $value ) ) ) {
+			return intval( $value );
+		}
+
+		throw new Exception( "Invalid int value for [{$k}]" );
+	}
+
+
+	public function getString(
+		string $k
+	) : string {
+
+		$value = $this->get( $k );
+
+		if ( is_null( $value ) ) {
+			throw new Exception( "Missing value for [{$k}]" );
+		}
+
+		if ( is_string( $value ) || is_int( $value ) ) {
+			return strval( $value );
+		}
+
+		throw new Exception( "Invalid string value for [{$k}]" );
+	}
+
+
+	public function getBool(
+		string $k
+	) : bool {
+
+		$value = $this->get( $k );
+
+		if ( is_null( $value ) ) {
+			throw new Exception( "Missing value for [{$k}]" );
+		}
+
+		if ( is_bool( $value ) || is_int( $value ) ) {
+			return boolval( $value );
+		}
+
+		throw new Exception( "Invalid string value for [{$k}]" );
 	}
 
 

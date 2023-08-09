@@ -102,6 +102,51 @@ class Config {
 	}
 
 
+	public function getInt(
+		string $key,
+		string $section = 'global',
+	) : int {
+
+		$value = $this->get( $key, $section );
+
+		if ( is_int( $value ) || ( is_string( $value ) && ctype_digit( $value ) ) ) {
+			return intval( $value );
+		}
+
+		throw new Exception( "Invalid int value for [{$key}]" );
+	}
+
+
+	public function getString(
+		string $key,
+		string $section = 'global',
+	) : string {
+
+		$value = $this->get( $key, $section );
+
+		if ( is_string( $value ) || is_int( $value ) ) {
+			return strval( $value );
+		}
+
+		throw new Exception( "Invalid string value for [{$key}]" );
+	}
+
+
+	public function getBool(
+		string $key,
+		string $section = 'global',
+	) : bool {
+
+		$value = $this->get( $key, $section );
+
+		if ( is_bool( $value ) || is_int( $value ) || is_string( $value ) ) {
+			return boolval( $value );
+		}
+
+		throw new Exception( "Invalid boolean value for [{$key}]" );
+	}
+
+
 	public function set(
 		string $key,
 		mixed $value,
