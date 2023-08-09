@@ -21,7 +21,7 @@ class ValidatorException extends Exception {
 	public static function build(
 		int $code = 0,
 		string $message = '',
-		array $data = []
+		array $data = [],
 	) : self {
 
 		$e = new self( $message, $code );
@@ -32,7 +32,7 @@ class ValidatorException extends Exception {
 
 
 	public function setData(
-		array $data
+		array $data,
 	) : void {
 
 		$this->data = $data;

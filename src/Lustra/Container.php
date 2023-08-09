@@ -17,7 +17,7 @@ class Container {
 
 
 	public function has(
-		string $k
+		string $k,
 	) : bool {
 
 		return array_key_exists( $k, $this->store ) ||
@@ -27,7 +27,7 @@ class Container {
 
 	public function add(
 		string $k,
-		mixed $v
+		mixed $v,
 	) : void {
 
 		if ( is_callable( $v ) ) {
@@ -39,7 +39,7 @@ class Container {
 
 
 	public function get(
-		string $k
+		string $k,
 	) : mixed {
 
 		if ( array_key_exists( $k, $this->store ) ) {
@@ -56,7 +56,7 @@ class Container {
 
 
 	public function build(
-		string $k
+		string $k,
 	) : mixed {
 
 		return $this->builders[ $k ]( $this );

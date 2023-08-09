@@ -19,7 +19,7 @@ class Validator {
 	public static function validate(
 		array $source,
 		array $rules,
-		array $types = []
+		array $types = [],
 	) : bool {
 
 		$valid = true;
@@ -37,7 +37,7 @@ class Validator {
 	public static function parse(
 		array $source,
 		array $rules,
-		array $types = []
+		array $types = [],
 	) : array {
 
 		$parsed = [];
@@ -88,7 +88,7 @@ class Validator {
 	public static function validateValue(
 		string $value,
 		string $type,
-		array $types = []
+		array $types = [],
 	) : bool {
 
 		if ( isset( self::$types[ $type ] ) ) {
@@ -100,11 +100,11 @@ class Validator {
 		}
 
 		$filters = [
-			'DOMAIN' => FILTER_VALIDATE_DOMAIN,
 			'EMAIL'  => FILTER_VALIDATE_EMAIL,
 			'IP'     => FILTER_VALIDATE_IP,
-			'MAC'    => FILTER_VALIDATE_MAC,
 			'URL'    => FILTER_VALIDATE_URL,
+			'DOMAIN' => FILTER_VALIDATE_DOMAIN,
+			'MAC'    => FILTER_VALIDATE_MAC,
 		];
 
 		if ( isset( $filters[ $type ] ) ) {

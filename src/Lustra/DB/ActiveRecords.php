@@ -17,7 +17,7 @@ abstract class ActiveRecords {
 
 
 	public function __construct(
-		DBAL $db
+		DBAL $db,
 	) {
 
 		$this->db = $db;
@@ -27,7 +27,7 @@ abstract class ActiveRecords {
 	public function find(
 		array $query = [],
 		array $bindings = [],
-		?string $class_entity = null
+		?string $class_entity = null,
 	) : array {
 
 		$query = array_merge( $query, [ 'FROM' => $this->table ] );
@@ -57,7 +57,7 @@ abstract class ActiveRecords {
 	public function findRecords(
 		string $class_entity,
 		array $query = [],
-		array $bindings = []
+		array $bindings = [],
 	) : array {
 
 		return $this->find( $query, $bindings, $class_entity );

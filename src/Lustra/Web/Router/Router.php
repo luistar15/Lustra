@@ -30,7 +30,7 @@ class Router {
 
 	public function __construct(
 		string $host = '',
-		string $path_prefix = '/'
+		string $path_prefix = '/',
 	) {
 
 		$this->host        = $host;
@@ -41,7 +41,7 @@ class Router {
 	public function addRoute(
 		string $path,
 		string|callable $controller,
-		array $options = []
+		array $options = [],
 	) : void {
 
 		$name         = $options['name'] ?? 'route-' . count( $this->routes );
@@ -73,7 +73,7 @@ class Router {
 
 	public function findMatch(
 		string $path,
-		string $method = null
+		string $method = null,
 	) : array {
 
 		$route = null;
@@ -116,7 +116,7 @@ class Router {
 
 	public function pathFor(
 		string $route_name,
-		array $parameters = []
+		array $parameters = [],
 	) : string {
 
 		$route = $this->routes[ $route_name ];
@@ -155,7 +155,7 @@ class Router {
 		array $parameters = [],
 		array $getvars = [],
 		bool $include_prefix = true,
-		bool $include_host = false
+		bool $include_host = false,
 	) : string {
 
 		$url = $this->pathFor( $route_name, $parameters );
@@ -179,7 +179,7 @@ class Router {
 	public function fullUrlFor(
 		string $route_name,
 		array $parameters = [],
-		array $getvars = []
+		array $getvars = [],
 	) : string {
 
 		return $this->urlFor(
@@ -193,7 +193,7 @@ class Router {
 
 
 	public function import(
-		array $data
+		array $data,
 	) : void {
 
 		[ $this->routes, $this->routes_methods ] = $data;
@@ -211,7 +211,7 @@ class Router {
 	public static function parsePath(
 		string $path,
 		array $requirements,
-		array $constraints
+		array $constraints,
 	) : array {
 
 		$requirements = array_merge( self::REQUIREMENTS, $requirements );

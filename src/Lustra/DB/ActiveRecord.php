@@ -18,7 +18,7 @@ abstract class ActiveRecord {
 
 	public function __construct(
 		?DBAL $db = null,
-		array $data = []
+		array $data = [],
 	) {
 
 		if ( $db ) {
@@ -31,7 +31,7 @@ abstract class ActiveRecord {
 
 	public function set(
 		string $k,
-		mixed $v
+		mixed $v,
 	) : void {
 
 		$this->data[ $k ] = $v;
@@ -39,7 +39,7 @@ abstract class ActiveRecord {
 
 
 	public function get(
-		string $k
+		string $k,
 	) : mixed {
 
 		return $this->data[ $k ] ?? null;
@@ -47,7 +47,7 @@ abstract class ActiveRecord {
 
 
 	public function setData(
-		iterable $data
+		iterable $data,
 	) : void {
 
 		foreach ( $data as $k => $v ) {
@@ -57,7 +57,7 @@ abstract class ActiveRecord {
 
 
 	public function getData(
-		array $columns = []
+		array $columns = [],
 	) : array {
 
 		if ( count( $columns ) === 0 ) {
@@ -80,7 +80,7 @@ abstract class ActiveRecord {
 
 
 	public function setPk(
-		?string $pk
+		?string $pk,
 	) : void {
 
 		$this->data[ $this->pk ] = $pk;
@@ -97,7 +97,7 @@ abstract class ActiveRecord {
 
 	public function load(
 		array $query,
-		array $bindings = []
+		array $bindings = [],
 	) : array {
 
 		$query = array_merge(
@@ -124,7 +124,7 @@ abstract class ActiveRecord {
 
 	public function loadByColumn(
 		string $column,
-		int|string $value
+		int|string $value,
 	) : array {
 
 		return $this->load(
@@ -135,7 +135,7 @@ abstract class ActiveRecord {
 
 
 	public function loadByPk(
-		int|string $pk
+		int|string $pk,
 	) : array {
 
 		return $this->loadByColumn( $this->pk, $pk );
@@ -146,7 +146,7 @@ abstract class ActiveRecord {
 
 
 	public function save(
-		array $columns = []
+		array $columns = [],
 	) : void {
 
 		$data = $this->getData( $columns );
@@ -184,7 +184,10 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function setDb( DBAL $db ) : void {
+	public function setDb(
+		DBAL $db,
+	) : void {
+
 		$this->db = $db;
 	}
 

@@ -12,7 +12,7 @@ use Exception;
 class SQLBuilder {
 
 	public static function build(
-		array $query
+		array $query,
 	) : string {
 
 		$query = array_merge(
@@ -84,7 +84,7 @@ class SQLBuilder {
 
 	public static function parseJoins(
 		array $joins,
-		array $relations = []
+		array $relations = [],
 	) : array {
 
 		$parsed = [];

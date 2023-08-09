@@ -45,7 +45,7 @@ class Arguments {
 
 	public function __construct(
 		array $params,
-		array $types = []
+		array $types = [],
 	) {
 
 		[ $this->params, $this->rules ] = $this->parseParams( $params );
@@ -62,7 +62,7 @@ class Arguments {
 
 	public function parse(
 		array $args,
-		bool $show_usage_on_error = true
+		bool $show_usage_on_error = true,
 	) : array {
 
 		$parsed     = [];
@@ -157,7 +157,7 @@ class Arguments {
 
 
 	public function displayUsage(
-		string $header = ''
+		string $header = '',
 	) : void {
 
 		$named_params      = [];
@@ -263,7 +263,7 @@ class Arguments {
 
 
 	public function displayUsageError(
-		string $error_message
+		string $error_message,
 	) : void {
 
 		$this->displayUsage(
@@ -276,7 +276,7 @@ class Arguments {
 
 
 	private function findParamByKey(
-		string $key
+		string $key,
 	) : ?array {
 
 		foreach ( $this->params as $param ) {
@@ -295,7 +295,7 @@ class Arguments {
 
 
 	private static function parseParams(
-		array $params
+		array $params,
 	) : array {
 
 		$rules = [];
@@ -332,7 +332,7 @@ class Arguments {
 	 */
 	private static function parseArgument(
 		array $args,
-		int $i
+		int $i,
 	) : array {
 
 		if ( isset( $args[ $i ] ) ) {
@@ -349,7 +349,7 @@ class Arguments {
 	 */
 	private static function printTable(
 		string $title,
-		array $rows
+		array $rows,
 	) : void {
 
 		if ( count( $rows ) === 0 ) {

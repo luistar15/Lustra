@@ -25,7 +25,7 @@ class ErrorHandler {
 
 	public function setup(
 		bool $debug,
-		string $error_log = ''
+		string $error_log = '',
 	) : void {
 
 		$this->debug = $debug;
@@ -46,7 +46,7 @@ class ErrorHandler {
 
 
 	public function setHandler(
-		callable $handler
+		callable $handler,
 	) : void {
 
 		$this->handler = $handler;
@@ -57,7 +57,7 @@ class ErrorHandler {
 		int $level,
 		string $message,
 		string $file,
-		int $line
+		int $line,
 	) : bool {
 
 		$this->handleException(
@@ -69,7 +69,7 @@ class ErrorHandler {
 
 
 	public function handleException(
-		Throwable $exception
+		Throwable $exception,
 	) : void {
 
 		if ( ob_get_length() ) {
@@ -103,7 +103,7 @@ class ErrorHandler {
 
 
 	public function dumpException(
-		Throwable $exception
+		Throwable $exception,
 	) : void {
 
 		if ( PHP_SAPI === 'cli' ) {
@@ -117,7 +117,7 @@ class ErrorHandler {
 
 
 	public static function formatExceptionHtml(
-		Throwable $exception
+		Throwable $exception,
 	) : string {
 
 		$message      = trim( $exception->getMessage() );
@@ -173,7 +173,7 @@ class ErrorHandler {
 
 
 	private static function dumpExceptionHtml(
-		Throwable $exception
+		Throwable $exception,
 	) : void {
 
 		header( 'HTTP/1.1 500 Internal Server Error', true );
@@ -195,7 +195,7 @@ class ErrorHandler {
 
 
 	private static function dumpExceptionCli(
-		Throwable $exception
+		Throwable $exception,
 	) : void {
 
 		$color = function ( $str, $code ) {

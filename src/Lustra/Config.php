@@ -14,8 +14,8 @@ class Config {
 	private array $data = [];
 
 
-	public function loadIni(
-		string $file
+	public function loadIniFile(
+		string $file,
 	) : void {
 
 		$data = parse_ini_file( $file, true, INI_SCANNER_TYPED );
@@ -28,8 +28,22 @@ class Config {
 	}
 
 
+	public function loadIni(
+		string $data,
+	) : void {
+
+		$data = parse_ini_string( $data, true, INI_SCANNER_TYPED );
+
+		if ( $data === false ) {
+			throw new Exception( 'Error parsing ini string' );
+		}
+
+		$this->data = array_replace_recursive( $this->data, $data );
+	}
+
+
 	public function loadEnv(
-		array $map
+		array $map,
 	) : void {
 
 		foreach ( $map as $section => $vars ) {
@@ -60,7 +74,7 @@ class Config {
 
 	public function exists(
 		string $key,
-		string $section = 'global'
+		string $section = 'global',
 	) : bool {
 
 		return isset( $this->data[ $section ][ $key ] );
@@ -71,7 +85,7 @@ class Config {
 		string $key,
 		string $section = 'global',
 		mixed $default = null,
-		array $placeholders = []
+		array $placeholders = [],
 	) : mixed {
 
 		if ( ! isset( $this->data[ $section ][ $key ] ) && is_null( $default ) ) {
@@ -91,7 +105,7 @@ class Config {
 	public function set(
 		string $key,
 		mixed $value,
-		string $section = 'global'
+		string $section = 'global',
 	) : void {
 
 		if ( ! isset( $this->data[ $section ] ) ) {
@@ -103,15 +117,17 @@ class Config {
 
 
 	public function replacePlaceholders(
-		array $placeholders = []
+		array $placeholders = [],
 	) : void {
 
-		if ( count( $placeholders ) > 0 ) {
-			foreach ( $this->data as $section => $values ) {
-				foreach ( $values as $k => $v ) {
-					if ( is_string( $v ) ) {
-						$this->data[ $section ][ $k ] = self::replacePlaceholdersInValue( $v, $placeholders );
-					}
+		if ( count( $placeholders ) === 0 ) {
+			return;
+		}
+
+		foreach ( $this->data as $section => $values ) {
+			foreach ( $values as $k => $v ) {
+				if ( is_string( $v ) ) {
+					$this->data[ $section ][ $k ] = self::replacePlaceholdersInValue( $v, $placeholders );
 				}
 			}
 		}
@@ -120,7 +136,7 @@ class Config {
 
 	private static function replacePlaceholdersInValue(
 		string $value,
-		array $placeholders
+		array $placeholders,
 	) : string {
 
 		return str_replace(

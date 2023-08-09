@@ -23,7 +23,7 @@ class DBAL extends PDO {
 		string $dsn,
 		string $username = '',
 		string $passwd = '',
-		array $options = []
+		array $options = [],
 	) {
 
 		$options[ PDO::ATTR_ERRMODE ] = PDO::ERRMODE_EXCEPTION;
@@ -47,7 +47,7 @@ class DBAL extends PDO {
 
 	public function execute(
 		string $sql,
-		array $bindings = []
+		array $bindings = [],
 	) : PDOStatement {
 
 		$this->connect();
@@ -70,7 +70,7 @@ class DBAL extends PDO {
 	public function getRows(
 		string $sql,
 		array $bindings = [],
-		int $fetch_type = PDO::FETCH_ASSOC
+		int $fetch_type = PDO::FETCH_ASSOC,
 	) : array {
 
 		$sth  = $this->execute( $sql, $bindings );
@@ -84,7 +84,7 @@ class DBAL extends PDO {
 	public function getRow(
 		string $sql,
 		array $bindings = [],
-		int $fetch_type = PDO::FETCH_ASSOC
+		int $fetch_type = PDO::FETCH_ASSOC,
 	) : array {
 
 		$sth = $this->execute( $sql, $bindings );
@@ -106,7 +106,7 @@ class DBAL extends PDO {
 	public function getColumn(
 		string $sql,
 		array $bindings = [],
-		int $column_number = 0
+		int $column_number = 0,
 	) : array {
 
 		$sth    = $this->execute( $sql, $bindings );
@@ -120,7 +120,7 @@ class DBAL extends PDO {
 	public function getCell(
 		string $sql,
 		array $bindings = [],
-		int $column_number = 0
+		int $column_number = 0,
 	) : ?string {
 
 		$sth = $this->execute( $sql, $bindings );
@@ -141,7 +141,7 @@ class DBAL extends PDO {
 	public function generateRows(
 		string $sql,
 		array $bindings = [],
-		int $fetch_type = PDO::FETCH_ASSOC
+		int $fetch_type = PDO::FETCH_ASSOC,
 	) : Iterator {
 
 		$sth = $this->execute( $sql, $bindings );
@@ -157,7 +157,7 @@ class DBAL extends PDO {
 	public function generateColumn(
 		string $sql,
 		array $bindings = [],
-		int $column_number = 0
+		int $column_number = 0,
 	) : Iterator {
 
 		$sth = $this->execute( $sql, $bindings );
@@ -177,7 +177,7 @@ class DBAL extends PDO {
 
 	public function insert(
 		string $table,
-		array $data
+		array $data,
 	) : int {
 
 		$columns     = [];
@@ -211,7 +211,7 @@ class DBAL extends PDO {
 		string $table,
 		array $data,
 		array $conditions = [],
-		array $bindings = []
+		array $bindings = [],
 	) : int {
 
 		$columns = [];
@@ -246,7 +246,7 @@ class DBAL extends PDO {
 	public function delete(
 		string $table,
 		array $conditions = [],
-		array $bindings = []
+		array $bindings = [],
 	) : int {
 
 		$sql = "DELETE FROM {$table}";
@@ -271,7 +271,7 @@ class DBAL extends PDO {
 
 
 	public static function getStatementColumns(
-		PDOStatement $sth
+		PDOStatement $sth,
 	) : array {
 
 		$columns = [];
@@ -288,7 +288,7 @@ class DBAL extends PDO {
 
 	public static function bindValues(
 		PDOStatement $sth,
-		array $bindings = []
+		array $bindings = [],
 	) : void {
 
 		$question_mark_position = 0;
@@ -314,7 +314,7 @@ class DBAL extends PDO {
 
 
 	private static function inferDataType(
-		string $type
+		string $type,
 	) : int {
 
 		// phpcs:disable

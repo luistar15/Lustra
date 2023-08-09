@@ -14,7 +14,7 @@ final class RouterFactory {
 		string $routes_config_file,
 		?string $cache_file = null,
 		string $controller_namespace = 'Site\\Controller',
-		string $controller_suffix = 'Controller'
+		string $controller_suffix = 'Controller',
 	) : Router {
 
 		$router = new Router( $host, $path_prefix );
@@ -72,7 +72,7 @@ final class RouterFactory {
 
 
 	public static function fixRoutesTree(
-		array $tree
+		array $tree,
 	) : array {
 
 		$camel_case = function ( $str ) {
@@ -172,7 +172,7 @@ final class RouterFactory {
 
 
 	public static function flattenRoutesTree(
-		array $tree
+		array $tree,
 	) : array {
 
 		$flatten = [];

@@ -32,12 +32,12 @@ class App {
 
 
 	public function __construct(
+		Container $container,
 		Router $router,
-		Container $container
 	) {
 
-		$this->router    = $router;
 		$this->container = $container;
+		$this->router    = $router;
 
 		$container->add( Router::class, $router );
 	}
@@ -80,7 +80,7 @@ class App {
 
 
 	public function instantiateService(
-		string $class
+		string $class,
 	) : object {
 
 		if ( ! class_exists( $class ) ) {
@@ -103,7 +103,7 @@ class App {
 
 	public function findServiceArguments(
 		ReflectionFunctionAbstract $function,
-		bool $include_route_parameters = false
+		bool $include_route_parameters = false,
 	) : array {
 
 		$args = [];
@@ -175,7 +175,7 @@ class App {
 
 
 	private function getReflectionClass(
-		ReflectionParameter $parameter
+		ReflectionParameter $parameter,
 	) : ?ReflectionClass {
 
 		$type = $parameter->getType();
@@ -201,7 +201,7 @@ class App {
 
 
 	public function setTemplateDir(
-		string $path
+		string $path,
 	) : void {
 
 		$this->template_dir = $path;
@@ -210,7 +210,7 @@ class App {
 
 	public function getTemplatePath(
 		string|array $filenames,
-		string $ext = 'php'
+		string $ext = 'php',
 	) : string {
 
 		if ( is_string( $filenames ) ) {
@@ -229,7 +229,10 @@ class App {
 	}
 
 
-	public function getDefaultTemplateFile( bool $split_dirs = false ) : string {
+	public function getDefaultTemplateFile(
+		bool $split_dirs = false,
+	) : string {
+
 		$path = $this->route['name'];
 
 		if ( $split_dirs ) {
@@ -242,7 +245,7 @@ class App {
 
 	public function renderTemplate(
 		string|array $path,
-		array &$data = null
+		array &$data = null,
 	) : string {
 
 		if ( is_array( $data ) ) {
@@ -259,7 +262,7 @@ class App {
 
 	public static function redirect(
 		string $url,
-		int $code = 302
+		int $code = 302,
 	) : void {
 
 		header( "Location: {$url}", true, $code );
