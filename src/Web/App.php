@@ -6,8 +6,9 @@ declare(strict_types=1);
 namespace Lustra\Web;
 
 
-use Lustra\Container;
 use Lustra\Web\Router\Router;
+
+use Psr\Container\ContainerInterface;
 
 use Closure;
 use Exception;
@@ -22,7 +23,7 @@ use ReflectionNamedType;
 
 class App {
 
-	public Container $container;
+	public ContainerInterface $container;
 
 	public Router $router;
 
@@ -32,14 +33,12 @@ class App {
 
 
 	public function __construct(
-		Container $container,
+		ContainerInterface $container,
 		Router $router,
 	) {
 
 		$this->container = $container;
 		$this->router    = $router;
-
-		$container->add( Router::class, $router );
 	}
 
 

@@ -6,11 +6,15 @@ declare(strict_types=1);
 namespace Lustra;
 
 
+use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+
 use ReflectionFunction;
 use Exception;
 
 
-class Container {
+class Container implements ContainerInterface {
 
 	private array $store    = [];
 	private array $builders = [];
@@ -51,7 +55,7 @@ class Container {
 			return $this->store[ $k ];
 		}
 
-		throw new Exception( "'{$k}' not found in container" );
+		throw new NotFoundException( "[{$k}] not found in container" );
 	}
 
 
@@ -84,3 +88,9 @@ class Container {
 	}
 
 }
+
+
+class ContainerException extends Exception implements ContainerExceptionInterface {}
+
+
+class NotFoundException extends Exception implements NotFoundExceptionInterface {}
