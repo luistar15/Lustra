@@ -98,7 +98,7 @@ class Router {
 				$route = $temp;
 
 				$route['parameters'] = array_filter(
-					array_slice( array_filter( $matches ), 1 ),
+					array_slice( $matches, 1 ),
 					fn ( $k ) => ! is_int( $k ),
 					ARRAY_FILTER_USE_KEY
 				);
