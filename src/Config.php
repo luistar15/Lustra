@@ -14,31 +14,69 @@ class Config {
 	protected array $data = [];
 
 
-	public function loadIniFile(
-		string $file,
+	public function loadJson(
+		string $json,
 	) : void {
 
-		$data = parse_ini_file( $file, true, INI_SCANNER_TYPED );
+		if ( $json === '' ) {
+			return;
+		}
 
-		if ( $data === false ) {
-			throw new Exception( "Error parsing ini file: {$file}" );
+		$data = json_decode( $json, true );
+
+		if ( ! is_array( $data ) ) {
+			throw new Exception( 'Error parsing config string' );
 		}
 
 		$this->data = array_replace_recursive( $this->data, $data );
 	}
 
 
-	public function loadIni(
-		string $data,
+	public function loadJsonFile(
+		string $file,
 	) : void {
 
-		$data = parse_ini_string( $data, true, INI_SCANNER_TYPED );
+		$this->loadJson( $this->getConfigFileContent( $file ) );
+	}
+
+
+	public function loadIni(
+		string $ini,
+	) : void {
+
+		$data = parse_ini_string( $ini, true, INI_SCANNER_TYPED );
 
 		if ( $data === false ) {
 			throw new Exception( 'Error parsing ini string' );
 		}
 
 		$this->data = array_replace_recursive( $this->data, $data );
+	}
+
+
+	public function loadIniFile(
+		string $file,
+	) : void {
+
+		$this->loadIni( $this->getConfigFileContent( $file ) );
+	}
+
+
+	private function getConfigFileContent(
+		string $file,
+	) : string {
+
+		if ( ! is_file( $file ) ) {
+			throw new Exception( "Config file not found: {$file}" );
+		}
+
+		$content = file_get_contents( $file );
+
+		if ( is_string( $content ) ) {
+			return trim( $content );
+		}
+
+		throw new Exception( "Error loading config file: {$file}" );
 	}
 
 
@@ -66,15 +104,15 @@ class Config {
 					$value = false;
 				}
 
-				$this->set( $key, $value, $section );
+				$this->set( $section, $key, $value );
 			}
 		}
 	}
 
 
 	public function exists(
+		string $section,
 		string $key,
-		string $section = 'global',
 	) : bool {
 
 		return isset( $this->data[ $section ][ $key ] );
@@ -82,8 +120,8 @@ class Config {
 
 
 	public function get(
+		string $section,
 		string $key,
-		string $section = 'global',
 		mixed $default = null,
 		array $placeholders = [],
 	) : mixed {
@@ -103,11 +141,11 @@ class Config {
 
 
 	public function getInt(
+		string $section,
 		string $key,
-		string $section = 'global',
 	) : int {
 
-		$value = $this->get( $key, $section );
+		$value = $this->get( $section, $key );
 
 		if ( is_int( $value ) || ( is_string( $value ) && ctype_digit( $value ) ) ) {
 			return intval( $value );
@@ -118,11 +156,11 @@ class Config {
 
 
 	public function getString(
+		string $section,
 		string $key,
-		string $section = 'global',
 	) : string {
 
-		$value = $this->get( $key, $section );
+		$value = $this->get( $section, $key );
 
 		if ( is_string( $value ) || is_int( $value ) ) {
 			return strval( $value );
@@ -133,11 +171,11 @@ class Config {
 
 
 	public function getBool(
+		string $section,
 		string $key,
-		string $section = 'global',
 	) : bool {
 
-		$value = $this->get( $key, $section );
+		$value = $this->get( $section, $key );
 
 		if ( is_bool( $value ) || is_int( $value ) || is_string( $value ) ) {
 			return boolval( $value );
@@ -147,10 +185,23 @@ class Config {
 	}
 
 
+	/** @return array<string, string|int|bool|null> */
+	public function getSection(
+		string $section,
+	) : array {
+
+		if ( isset( $this->data[ $section ] ) ){
+			throw new Exception( "Config section [{$section}] was not found" );
+		}
+
+		return $this->data[ $section ];
+	}
+
+
 	public function set(
+		string $section,
 		string $key,
 		mixed $value,
-		string $section = 'global',
 	) : void {
 
 		if ( ! isset( $this->data[ $section ] ) ) {
