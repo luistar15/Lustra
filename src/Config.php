@@ -11,7 +11,7 @@ use Exception;
 
 class Config {
 
-	private array $data = [];
+	protected array $data = [];
 
 
 	public function loadIniFile(
