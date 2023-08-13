@@ -50,6 +50,10 @@ class Validator {
 			$required = $rule[1] ?? false;
 			$default  = $rule[2] ?? null;
 
+			if ( ! array_key_exists( 2, $rule ) && isset( $source[ $k ] ) ) {
+				$default = '';
+			}
+
 			$error = null;
 
 			if ( $required && $missing ) {
