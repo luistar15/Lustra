@@ -185,7 +185,7 @@ class Config {
 	}
 
 
-	/** @return array<string, string|int|bool|null> */
+	/** @return array<string|int, string|int|bool|null> */
 	public function getSection(
 		string $section,
 	) : array {
