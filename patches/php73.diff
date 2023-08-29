@@ -1,0 +1,14 @@
+diff --git a/src/ErrorHandler.php b/src/ErrorHandler.php
+--- a/src/ErrorHandler.php
++++ b/src/ErrorHandler.php
+@@ -28,8 +28,8 @@ class ErrorHandler {
+ 
+ 	public function setup( bool $debug, string $error_log = '' ): void {
+ 		$this->debug = $debug;
+-		ini_set( 'display_errors', $debug );
+-		ini_set( 'log_errors', ! $debug );
++		ini_set( 'display_errors', $debug ? '1' : '0' );
++		ini_set( 'log_errors', ! $debug ? '1' : '0' );
+ 		ini_set( 'error_log', $error_log );
+ 		error_reporting( E_ALL );
+ 	}

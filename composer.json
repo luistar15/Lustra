@@ -23,7 +23,8 @@
 	"require-dev": {
 		"phpstan/phpstan": "^1.10",
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-		"wptrt/wpthemereview": "^0.2"
+		"wptrt/wpthemereview": "^0.2",
+		"rector/rector": "^0.18"
 	},
 	"autoload": {
 		"psr-4": {
@@ -33,7 +34,8 @@
 	"scripts": {
 		"analyze": "./vendor/bin/phpstan analyze -l max -c ./.phpstan/config.neon src",
 		"standards:check": "./vendor/bin/phpcs --standard=./.phpcs/ruleset.xml",
-		"standards:fix": "./vendor/bin/phpcbf --standard=./.phpcs/ruleset.xml"
+		"standards:fix": "./vendor/bin/phpcbf --standard=./.phpcs/ruleset.xml",
+		"transpile:php73": "./vendor/bin/rector process -c ./.rector/php73.php"
 	},
 	"config": {
 		"allow-plugins": {

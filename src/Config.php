@@ -190,7 +190,7 @@ class Config {
 		string $section,
 	) : array {
 
-		if ( ! isset( $this->data[ $section ] ) ){
+		if ( ! isset( $this->data[ $section ] ) ) {
 			throw new Exception( "Config section [{$section}] was not found" );
 		}
 
