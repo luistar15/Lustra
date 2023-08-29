@@ -16,24 +16,26 @@ use Exception;
 
 class Container implements ContainerInterface {
 
-	private array $store    = [];
-	private array $builders = [];
+	/**
+	 * @var mixed[]
+	 */
+	private $store = [];
+	/**
+	 * @var mixed[]
+	 */
+	private $builders = [];
 
 
-	public function has(
-		string $k,
-	) : bool {
-
+	public function has( string $k ): bool {
 		return array_key_exists( $k, $this->store ) ||
 			   array_key_exists( $k, $this->builders );
 	}
 
 
-	public function add(
-		string $k,
-		mixed $v,
-	) : void {
-
+	/**
+	 * @param mixed $v
+	 */
+	public function add( string $k, $v ): void {
 		if ( is_callable( $v ) ) {
 			$this->builders[ $k ] = $v;
 		} else {
@@ -42,27 +44,25 @@ class Container implements ContainerInterface {
 	}
 
 
-	public function get(
-		string $k,
-	) : mixed {
-
+	/**
+	 * @return mixed
+	 */
+	public function get( string $k ) {
 		if ( array_key_exists( $k, $this->store ) ) {
 			return $this->store[ $k ];
 		}
-
 		if ( isset( $this->builders[ $k ] ) ) {
 			$this->store[ $k ] = $this->build( $k );
 			return $this->store[ $k ];
 		}
-
 		throw new NotFoundException( "[{$k}] not found in container" );
 	}
 
 
-	public function build(
-		string $k,
-	) : mixed {
-
+	/**
+	 * @return mixed
+	 */
+	public function build( string $k ) {
 		return $this->builders[ $k ]( $this );
 	}
 

@@ -8,58 +8,55 @@ namespace Lustra\DB;
 
 abstract class ActiveRecords {
 
-	protected DBAL $db;
+	/**
+	 * @var \Lustra\DB\DBAL
+	 */
+	protected $db;
 
-	protected string $table = '';
-	protected string $pk    = 'id';
+	/**
+	 * @var string
+	 */
+	protected $table = '';
+	/**
+	 * @var string
+	 */
+	protected $pk = 'id';
 
-	protected array $relations = [];
+	/**
+	 * @var mixed[]
+	 */
+	protected $relations = [];
 
 
-	public function __construct(
-		DBAL $db,
-	) {
-
+	public function __construct( DBAL $db ) {
 		$this->db = $db;
 	}
 
 
-	public function find(
-		array $query = [],
-		array $bindings = [],
-		?string $class_entity = null,
-	) : array {
-
+	public function find( array $query = [], array $bindings = [], ?string $class_entity = null ): array {
 		$query = array_merge( $query, [ 'FROM' => $this->table ] );
-
 		if ( isset( $query['JOIN'] ) ) {
 			$query['JOIN'] = SQLBuilder::parseJoins(
 				$query['JOIN'],
 				$this->relations
 			);
 		}
-
 		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
-
 		if ( $class_entity && class_exists( $class_entity ) ) {
 			$rows = array_map(
-				fn ( $row ) => new $class_entity( null, $row ),
+				function ( $row ) use ( $class_entity ) {
+					return new $class_entity( null, $row );
+				},
 				$rows
 			);
 		}
-
 		if ( is_array( $rows ) ) {
 			return $rows;
 		}
 	}
 
 
-	public function findRecords(
-		string $class_entity,
-		array $query = [],
-		array $bindings = [],
-	) : array {
-
+	public function findRecords( string $class_entity, array $query = [], array $bindings = [] ): array {
 		return $this->find( $query, $bindings, $class_entity );
 	}
 
