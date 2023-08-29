@@ -17,7 +17,7 @@
 		}
 	],
 	"require": {
-		"php": "^8.2",
+		"php": "^7.3",
 		"psr/container": "^2.0"
 	},
 	"require-dev": {
