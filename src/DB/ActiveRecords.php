@@ -6,9 +6,10 @@ declare(strict_types=1);
 namespace Lustra\DB;
 
 
-abstract class ActiveRecords {
+use Exception;
 
-	protected DBAL $db;
+
+abstract class ActiveRecords {
 
 	protected string $table = '';
 	protected string $pk    = 'id';
@@ -17,17 +18,15 @@ abstract class ActiveRecords {
 
 
 	public function __construct(
-		DBAL $db,
-	) {
-
-		$this->db = $db;
-	}
+		protected DBAL $db,
+		protected ?string $entity_class = null,
+	) {}
 
 
 	public function find(
 		array $query = [],
 		array $bindings = [],
-		?string $class_entity = null,
+		bool $map_entities = false,
 	) : array {
 
 		$query = array_merge( $query, [ 'FROM' => $this->table ] );
@@ -41,26 +40,30 @@ abstract class ActiveRecords {
 
 		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
 
-		if ( $class_entity && class_exists( $class_entity ) ) {
+		if ( $map_entities ) {
+			$entity_class = $this->entity_class ?? null;
+
+			if ( ! isset( $entity_class ) || ! class_exists( $entity_class ) ) {
+				throw new Exception( 'Can not find entity class: ' . $entity_class );
+			}
+
 			$rows = array_map(
-				fn ( $row ) => new $class_entity( null, $row ),
+				fn ( $row ) => new $entity_class( $this->db, $row ),
 				$rows
 			);
 		}
 
-		if ( is_array( $rows ) ) {
-			return $rows;
-		}
+		return $rows;
 	}
 
 
+	/** @return ActiveRecord[] */
 	public function findRecords(
-		string $class_entity,
 		array $query = [],
 		array $bindings = [],
 	) : array {
 
-		return $this->find( $query, $bindings, $class_entity );
+		return $this->find( $query, $bindings, true );
 	}
 
 
