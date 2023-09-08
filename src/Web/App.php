@@ -23,20 +23,28 @@ use ReflectionNamedType;
 
 class App {
 
-	public ContainerInterface $container;
+	/**
+	 * @var \Psr\Container\ContainerInterface
+	 */
+	public $container;
 
-	public Router $router;
+	/**
+	 * @var \Lustra\Web\Router\Router
+	 */
+	public $router;
 
-	public array $route;
+	/**
+	 * @var mixed[]
+	 */
+	public $route;
 
-	private string $template_dir = '.';
+	/**
+	 * @var string
+	 */
+	private $template_dir = '.';
 
 
-	public function __construct(
-		ContainerInterface $container,
-		Router $router,
-	) {
-
+	public function __construct( ContainerInterface $container, Router $router ) {
 		$this->container = $container;
 		$this->router    = $router;
 	}
@@ -78,19 +86,14 @@ class App {
 	}
 
 
-	public function instantiateService(
-		string $class,
-	) : object {
-
+	public function instantiateService( string $class ): object {
 		if ( ! class_exists( $class ) ) {
 			throw new InvalidArgumentException(
 				"'{$class}' argument is not a valid ClassName",
 			);
 		}
-
 		$reflection  = new ReflectionClass( $class );
 		$constructor = $reflection->getConstructor();
-
 		if ( $constructor ) {
 			$arguments = $this->findServiceArguments( $constructor, false );
 			return new $class( ...$arguments );
@@ -100,15 +103,9 @@ class App {
 	}
 
 
-	public function findServiceArguments(
-		ReflectionFunctionAbstract $function,
-		bool $include_route_parameters = false,
-	) : array {
-
-		$args = [];
-
+	public function findServiceArguments( ReflectionFunctionAbstract $function, bool $include_route_parameters = false ): array {
+		$args       = [];
 		$parameters = $function->getParameters();
-
 		foreach ( $parameters as $parameter ) {
 			$arg       = null;
 			$arg_name  = $parameter->getName();
@@ -168,54 +165,40 @@ class App {
 				);
 			}
 		}
-
 		return $args;
 	}
 
 
-	private function getReflectionClass(
-		ReflectionParameter $parameter,
-	) : ?ReflectionClass {
-
+	private function getReflectionClass( ReflectionParameter $parameter ): ?ReflectionClass {
 		$type = $parameter->getType();
-
 		if ( is_null( $type ) ) {
 			return null;
 		}
-
 		if ( ! ( $type instanceof ReflectionNamedType ) ) {
 			return null;
 		}
-
 		if ( $type->isBuiltin() ) {
 			return null;
 		}
-
 		if ( ! class_exists( $type->getName() ) ) {
 			return null;
 		}
-
 		return new ReflectionClass( $type->getName() );
 	}
 
 
-	public function setTemplateDir(
-		string $path,
-	) : void {
-
+	public function setTemplateDir( string $path ): void {
 		$this->template_dir = $path;
 	}
 
 
-	public function getTemplatePath(
-		string|array $filenames,
-		string $ext = 'php',
-	) : string {
-
+	/**
+	 * @param string|mixed[] $filenames
+	 */
+	public function getTemplatePath( $filenames, string $ext = 'php' ): string {
 		if ( is_string( $filenames ) ) {
 			$filenames = [ $filenames ];
 		}
-
 		foreach ( $filenames as $filename ) {
 			$file = "{$this->template_dir}/{$filename}.{$ext}";
 
@@ -223,47 +206,33 @@ class App {
 				return $file;
 			}
 		}
-
 		throw new Exception( 'Missing template for ' . json_encode( $filenames ) );
 	}
 
 
-	public function getDefaultTemplateFile(
-		bool $split_dirs = false,
-	) : string {
-
+	public function getDefaultTemplateFile( bool $split_dirs = false ): string {
 		$path = $this->route['name'];
-
 		if ( $split_dirs ) {
 			$path = str_replace( '-', '/', $path );
 		}
-
 		return $this->getTemplatePath( $path );
 	}
 
 
-	public function renderTemplate(
-		string|array $path,
-		array &$data = null,
-	) : string {
-
+	/**
+	 * @param string|mixed[] $path
+	 */
+	public function renderTemplate( $path, array &$data = null ): string {
 		if ( is_array( $data ) ) {
 			extract( $data, EXTR_REFS ); // phpcs:ignore
 		}
-
 		ob_start();
-
 		require $this->getTemplatePath( $path );
-
 		return ob_get_clean() ?: '';
 	}
 
 
-	public static function redirect(
-		string $url,
-		int $code = 302,
-	) : void {
-
+	public static function redirect( string $url, int $code = 302 ): void {
 		header( "Location: {$url}", true, $code );
 		exit;
 	}

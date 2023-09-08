@@ -11,11 +11,23 @@ use Exception;
 
 class Router {
 
-	private string $host;
-	private string $path_prefix;
+	/**
+	 * @var string
+	 */
+	private $host;
+	/**
+	 * @var string
+	 */
+	private $path_prefix;
 
-	private array $routes         = [];
-	private array $routes_methods = [];
+	/**
+	 * @var mixed[]
+	 */
+	private $routes = [];
+	/**
+	 * @var mixed[]
+	 */
+	private $routes_methods = [];
 
 	private const REQUIREMENTS = [
 		'digit' => '\d+',
@@ -28,39 +40,27 @@ class Router {
 	];
 
 
-	public function __construct(
-		string $host = '',
-		string $path_prefix = '/',
-	) {
-
+	public function __construct( string $host = '', string $path_prefix = '/' ) {
 		$this->host        = $host;
 		$this->path_prefix = $path_prefix;
 	}
 
 
-	public function addRoute(
-		string $path,
-		string|callable $controller,
-		array $options = [],
-	) : void {
-
+	/**
+	 * @param string|callable $controller
+	 */
+	public function addRoute( string $path, $controller, array $options = [] ): void {
 		$name         = $options['name'] ?? 'route-' . count( $this->routes );
 		$requirements = $options['requirements'] ?? [];
 		$constraints  = $options['constraints'] ?? [];
 		$methods      = $options['methods'] ?? [ 'GET' ];
-
-		$route = self::parsePath( $path, $requirements, $constraints );
-
+		$route        = self::parsePath( $path, $requirements, $constraints );
 		if ( is_string( $controller ) && strpos( $controller, '@' ) === false ) {
 			$controller .= '@__invoke';
 		}
-
 		$route['controller'] = $controller;
-
 		// --------------
-
 		$this->routes[ $name ] = $route;
-
 		foreach ( $methods as $method ) {
 			if ( isset( $this->routes_methods[ $method ] ) ) {
 				$this->routes_methods[ $method ][] = $name;
@@ -71,17 +71,11 @@ class Router {
 	}
 
 
-	public function findMatch(
-		string $path,
-		string $method = null,
-	) : array {
-
+	public function findMatch( string $path, string $method = null ): array {
 		$route = null;
-
-		$path = preg_replace( "#^{$this->path_prefix}#", '', $path ); // strip prefix
-
+		$path  = preg_replace( "#^{$this->path_prefix}#", '', $path );
+		// strip prefix
 		$routes_names = $method ? $this->routes_methods[ $method ] : array_keys( $this->routes );
-
 		foreach ( $routes_names as $route_name ) {
 			$temp = $this->routes[ $route_name ];
 
@@ -99,7 +93,9 @@ class Router {
 
 				$route['parameters'] = array_filter(
 					array_slice( $matches, 1 ),
-					fn ( $k ) => ! is_int( $k ),
+					function ( $k ) {
+						return ! is_int( $k );
+					},
 					ARRAY_FILTER_USE_KEY
 				);
 			}
@@ -109,29 +105,27 @@ class Router {
 				return $route;
 			}
 		}
-
 		throw new RouteNotFoundException( "Route not found for '/{$path}'" );
 	}
 
 
-	public function pathFor(
-		string $route_name,
-		array $parameters = [],
-	) : string {
-
+	public function pathFor( string $route_name, array $parameters = [] ): string {
 		$route = $this->routes[ $route_name ];
 		$path  = $route['path'];
-
 		if ( isset( $route['path_regexp'] ) ) {
 			$parameters = array_filter(
 				$parameters,
-				fn ( $val ) => ! in_array( $val, [ null, false, '' ], true )
+				function ( $val ) {
+					return ! in_array( $val, [ null, false, '' ], true );
+				}
 			);
 
 			// replace parameters values
 			if ( count( $parameters ) > 0 ) {
 				$placeholders = array_map(
-					fn ( $k ) => "{{$k}}",
+					function ( $k ) {
+						return "{{$k}}";
+					},
 					array_keys( $parameters )
 				);
 
@@ -141,47 +135,32 @@ class Router {
 			// clear optional parameters
 			$path = preg_replace_callback(
 				'/\[([^\]]+)\]/',
-				fn ( $m ) => preg_match( '/{.*}/', $m[1] ) ? '' : $m[1],
+				function ( $m ) {
+					return preg_match( '/{.*}/', $m[1] ) ? '' : $m[1];
+				},
 				$path
 			);
 		}
-
 		return $path;
 	}
 
 
-	public function urlFor(
-		string $route_name,
-		array $parameters = [],
-		array $getvars = [],
-		bool $include_prefix = true,
-		bool $include_host = false,
-	) : string {
-
+	public function urlFor( string $route_name, array $parameters = [], array $getvars = [], bool $include_prefix = true, bool $include_host = false ): string {
 		$url = $this->pathFor( $route_name, $parameters );
-
 		if ( $include_host || $include_prefix ) {
 			$url = $this->path_prefix . $url;
 		}
-
 		if ( count( $getvars ) > 0 ) {
 			$url .= '?' . http_build_query( $getvars );
 		}
-
 		if ( $include_host ) {
 			$url = $this->host . $url;
 		}
-
 		return $url;
 	}
 
 
-	public function fullUrlFor(
-		string $route_name,
-		array $parameters = [],
-		array $getvars = [],
-	) : string {
-
+	public function fullUrlFor( string $route_name, array $parameters = [], array $getvars = [] ): string {
 		return $this->urlFor(
 			$route_name,
 			$parameters,
@@ -192,10 +171,7 @@ class Router {
 	}
 
 
-	public function import(
-		array $data,
-	) : void {
-
+	public function import( array $data ): void {
 		[ $this->routes, $this->routes_methods ] = $data;
 	}
 
@@ -208,17 +184,10 @@ class Router {
 	// -------------------------------------------------------------------------
 
 
-	public static function parsePath(
-		string $path,
-		array $requirements,
-		array $constraints,
-	) : array {
-
+	public static function parsePath( string $path, array $requirements, array $constraints ): array {
 		$requirements = array_merge( self::REQUIREMENTS, $requirements );
-
-		$parameters = [];
-		$paramnames = [];
-
+		$parameters   = [];
+		$paramnames   = [];
 		// extract parameters
 		$path_regexp = preg_replace_callback(
 			'/{(?<name>\w+)(:(?<requirement>[^}]+))?}/',
@@ -250,50 +219,38 @@ class Router {
 			},
 			$path
 		);
-
 		if ( ! is_string( $path_regexp ) ) {
 			throw new Exception( 'preg_replace_callback error' );
 		}
-
 		if ( count( $parameters ) === 0 ) {
 			return compact( 'path' );
 		}
-
-
 		$regexp_delimiter = '#';
-
 		// build path template
 		$path = strtr( $path_regexp, $paramnames );
-
-
 		// change optional blocks format
 		$path_regexp = preg_replace_callback(
 			'/\[([^\]]+)\]/',
-			fn ( $matches ) => sprintf( '~%s~', $matches[1] ),
+			function ( $matches ) {
+				return sprintf( '~%s~', $matches[1] );
+			},
 			$path_regexp
 		);
-
 		if ( ! is_string( $path_regexp ) ) {
 			throw new Exception( 'preg_replace_callback error' );
 		}
-
-
 		// escape regex chars
 		$path_regexp = preg_quote( $path_regexp, $regexp_delimiter );
-
-
 		// restore parsed parameters
 		$path_regexp = strtr( $path_regexp, $parameters );
-
-
 		// fix optional blocks
 		$path_regexp = preg_replace_callback(
 			'/~([^~]+)~/',
-			fn ( $matches ) => sprintf( '(?|%s)?', $matches[1] ),
+			function ( $matches ) {
+				return sprintf( '(?|%s)?', $matches[1] );
+			},
 			$path_regexp
 		);
-
-
 		// build regex
 		$path_regexp = sprintf(
 			'%s^%s$%s',
@@ -301,8 +258,6 @@ class Router {
 			$path_regexp,
 			$regexp_delimiter
 		);
-
-
 		// --
 		return compact( 'path', 'path_regexp' );
 	}

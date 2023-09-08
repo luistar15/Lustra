@@ -16,32 +16,19 @@ class Validator {
 	 *   ]
 	 * );
 	 */
-	public static function validate(
-		array $source,
-		array $rules,
-		array $types = [],
-	) : bool {
-
+	public static function validate( array $source, array $rules, array $types = [] ): bool {
 		$valid = true;
-
 		try {
 			self::parse( $source, $rules, $types );
 		} catch ( ValidatorException $e ) {
 			$valid = false;
 		}
-
 		return $valid;
 	}
 
 
-	public static function parse(
-		array $source,
-		array $rules,
-		array $types = [],
-	) : array {
-
+	public static function parse( array $source, array $rules, array $types = [] ): array {
 		$parsed = [];
-
 		foreach ( $rules as $k => $rule ) {
 			$value   = $source[ $k ] ?? '';
 			$missing = $value === '';
@@ -84,25 +71,17 @@ class Validator {
 
 			$parsed[ $k ] = $missing ? $default : $value;
 		}
-
 		return $parsed;
 	}
 
 
-	public static function validateValue(
-		string $value,
-		string $type,
-		array $types = [],
-	) : bool {
-
+	public static function validateValue( string $value, string $type, array $types = [] ): bool {
 		if ( isset( self::$types[ $type ] ) ) {
 			return preg_match( self::$types[ $type ], $value ) === 1;
 		}
-
 		if ( isset( $types[ $type ] ) ) {
 			return preg_match( $types[ $type ], $value ) === 1;
 		}
-
 		$filters = [
 			'EMAIL'  => FILTER_VALIDATE_EMAIL,
 			'IP'     => FILTER_VALIDATE_IP,
@@ -110,11 +89,9 @@ class Validator {
 			'DOMAIN' => FILTER_VALIDATE_DOMAIN,
 			'MAC'    => FILTER_VALIDATE_MAC,
 		];
-
 		if ( isset( $filters[ $type ] ) ) {
 			return filter_var( $value, $filters[ $type ] ) !== false;
 		}
-
 		throw ValidatorException::build(
 			ValidatorException::MISSING_TYPE,
 			"Missing validator type: {$type}",
@@ -126,7 +103,10 @@ class Validator {
 	}
 
 
-	private static array $types = [
+	/**
+	 * @var mixed[]
+	 */
+	private static $types = [
 		'BOOL'     => '/^[01]$/',
 		'DATE'     => '/^\d{4}-\d{2}-\d{2}$/',
 		'DATETIME' => '/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/',

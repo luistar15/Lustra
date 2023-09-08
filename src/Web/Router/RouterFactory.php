@@ -8,31 +8,17 @@ namespace Lustra\Web\Router;
 
 final class RouterFactory {
 
-	public static function build(
-		string $host,
-		string $path_prefix,
-		string $routes_config_file,
-		?string $cache_file = null,
-		string $controller_namespace = 'Site\\Controller',
-		string $controller_suffix = 'Controller',
-	) : Router {
-
+	public static function build( string $host, string $path_prefix, string $routes_config_file, ?string $cache_file = null, string $controller_namespace = 'Site\\Controller', string $controller_suffix = 'Controller' ): Router {
 		$router = new Router( $host, $path_prefix );
-
 		if ( is_string( $cache_file ) && is_file( $cache_file ) ) {
 			$router->import( require $cache_file );
 			return $router;
 		}
-
 		// ------------------------------------------
-
-		$config = require $routes_config_file;
-
+		$config              = require $routes_config_file;
 		$routes_requirements = $config['requirements'] ?? [];
 		$routes_constraints  = $config['constraints'] ?? [];
-
-		$routes = self::flattenRoutesTree( self::fixRoutesTree( $config['routes'] ) );
-
+		$routes              = self::flattenRoutesTree( self::fixRoutesTree( $config['routes'] ) );
 		foreach ( $routes as $route_name => $route ) {
 			$controller_class  = $route['controller_class'];
 			$controller_method = $route['controller_method'];
@@ -58,34 +44,26 @@ final class RouterFactory {
 				]
 			);
 		}
-
 		// ------------------------------------------
-
 		if ( is_string( $cache_file ) && ! is_file( $cache_file ) ) {
 			$data = var_export( $router->export(), true );
 
 			file_put_contents( $cache_file, "<?php return {$data};\n" );
 		}
-
 		return $router;
 	}
 
 
-	public static function fixRoutesTree(
-		array $tree,
-	) : array {
-
-		$camel_case = function ( $str ) {
+	public static function fixRoutesTree( array $tree ): array {
+		$camel_case       = function ( $str ) {
 			$lower = preg_replace( '/[^a-z0-9]+/i', ' ', strtolower( $str ) );
 			return $lower ? strtr( ucwords( $lower ), [ ' ' => '' ] ) : $str;
 		};
-
 		$lower_camel_case = function ( $str ) use ( &$camel_case ) {
 			$str = $camel_case( $str );
 			return strtolower( substr( $str, 0, 1 ) ) . substr( $str, 1 );
 		};
-
-		$walker = function (
+		$walker           = function (
 			array $nodes,
 			bool $has_parent
 		) use (
@@ -166,17 +144,12 @@ final class RouterFactory {
 
 			return $fixed;
 		};
-
 		return $walker( $tree, false );
 	}
 
 
-	public static function flattenRoutesTree(
-		array $tree,
-	) : array {
-
-		$flatten = [];
-
+	public static function flattenRoutesTree( array $tree ): array {
+		$flatten   = [];
 		$flattener = function ( array $nodes ) use ( &$flattener ) : iterable {
 			foreach ( $nodes as $node_id => $node ) {
 				if ( isset( $node['childs'] ) ) {
@@ -196,14 +169,12 @@ final class RouterFactory {
 				}
 			}
 		};
-
 		foreach ( $flattener( $tree ) as $route_name => $route ) {
 			$route['path']             = implode( '/', $route['path'] );
 			$route['controller_class'] = implode( '\\', $route['controller_class'] );
 
 			$flatten[ $route_name ] = $route;
 		}
-
 		return $flatten;
 	}
 

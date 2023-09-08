@@ -11,35 +11,44 @@ use Exception;
 
 abstract class ActiveRecords {
 
-	protected string $table = '';
-	protected string $pk    = 'id';
+	/**
+	 * @var \Lustra\DB\DBAL
+	 */
+	protected $db;
+	/**
+	 * @var string|null
+	 */
+	protected $entity_class;
+	/**
+	 * @var string
+	 */
+	protected $table = '';
+	/**
+	 * @var string
+	 */
+	protected $pk = 'id';
 
-	protected array $relations = [];
+	/**
+	 * @var mixed[]
+	 */
+	protected $relations = [];
 
 
-	public function __construct(
-		protected DBAL $db,
-		protected ?string $entity_class = null,
-	) {}
+	public function __construct( DBAL $db, ?string $entity_class = null ) {
+		$this->db           = $db;
+		$this->entity_class = $entity_class;
+	}
 
 
-	public function find(
-		array $query = [],
-		array $bindings = [],
-		bool $map_entities = false,
-	) : array {
-
+	public function find( array $query = [], array $bindings = [], bool $map_entities = false ): array {
 		$query = array_merge( $query, [ 'FROM' => $this->table ] );
-
 		if ( isset( $query['JOIN'] ) ) {
 			$query['JOIN'] = SQLBuilder::parseJoins(
 				$query['JOIN'],
 				$this->relations
 			);
 		}
-
 		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
-
 		if ( $map_entities ) {
 			$entity_class = $this->entity_class ?? null;
 
@@ -48,21 +57,18 @@ abstract class ActiveRecords {
 			}
 
 			$rows = array_map(
-				fn ( $row ) => new $entity_class( $this->db, $row ),
+				function ( $row ) use ( $entity_class ) {
+					return new $entity_class( $this->db, $row );
+				},
 				$rows
 			);
 		}
-
 		return $rows;
 	}
 
 
 	/** @return ActiveRecord[] */
-	public function findRecords(
-		array $query = [],
-		array $bindings = [],
-	) : array {
-
+	public function findRecords( array $query = [], array $bindings = [] ): array {
 		return $this->find( $query, $bindings, true );
 	}
 
