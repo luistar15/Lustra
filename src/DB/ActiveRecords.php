@@ -67,6 +67,11 @@ abstract class ActiveRecords {
 	}
 
 
+	public function getTableName() : string {
+		return $this->table;
+	}
+
+
 	public function getDb() : DBAL {
 		return $this->db;
 	}

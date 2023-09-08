@@ -241,6 +241,14 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
+	public function getTableName() : string {
+		return $this->table;
+	}
+
+
+	// -------------------------------------------------------------------------
+
+
 	public function setDb(
 		DBAL $db,
 	) : void {
