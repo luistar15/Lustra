@@ -13,6 +13,7 @@ class SQLBuilder {
 
 	public static function build(
 		array $query,
+		array $relations = [],
 	) : string {
 
 		$query = array_merge(
@@ -30,6 +31,12 @@ class SQLBuilder {
 			$query
 		);
 
+		if ( count( $query['JOIN'] ) > 0 ) {
+			$query['JOIN'] = self::parseJoins(
+				$query['JOIN'],
+				$relations,
+			);
+		}
 
 		$sql = [ 'SELECT' ];
 
