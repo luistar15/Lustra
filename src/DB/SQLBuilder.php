@@ -11,7 +11,7 @@ use Exception;
 
 class SQLBuilder {
 
-	public static function build( array $query ): string {
+	public static function build( array $query, array $relations = [] ): string {
 		$query = array_merge(
 			[
 				'DISTINCT' => false,
@@ -26,7 +26,13 @@ class SQLBuilder {
 			],
 			$query
 		);
-		$sql   = [ 'SELECT' ];
+		if ( count( $query['JOIN'] ) > 0 ) {
+			$query['JOIN'] = self::parseJoins(
+				$query['JOIN'],
+				$relations,
+			);
+		}
+		$sql = [ 'SELECT' ];
 		foreach ( $query as $k => $v ) {
 			if ( is_string( $v ) && ! in_array( $k, [ 'DISTINCT', 'FROM', 'LIMIT' ], true ) ) {
 				$v = [ $v ];

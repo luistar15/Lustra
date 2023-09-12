@@ -12,49 +12,31 @@ use Exception;
 abstract class ActiveRecord {
 
 	/**
-	 * @var \Lustra\DB\DBAL
+	 * @var \Lustra\DB\ActiveRecordDefinition
 	 */
-	protected $db;
-
-	/**
-	 * @var string
-	 */
-	protected $table = '';
-	/**
-	 * @var string
-	 */
-	protected $pk = 'id';
-
+	protected $definition;
 	/**
 	 * @var mixed[]
 	 */
 	protected $data = [];
-
-
-	public function __construct( ?DBAL $db = null, array $data = [] ) {
-		if ( $db ) {
-			$this->db = $db;
-		}
-		$this->setData( $data );
+	public function __construct( ActiveRecordDefinition $definition, array $data = [] ) {
+		$this->definition = $definition;
+		$this->data       = $data;
 	}
-
-
+	// -------------------------------------------------------------------------
 	/**
 	 * @param mixed $v
 	 */
 	public function set( string $k, $v ): void {
 		$this->data[ $k ] = $v;
 	}
-
-
+	// -------------------------------------------------------------------------
 	/**
 	 * @return mixed
 	 */
 	public function get( string $k ) {
 		return $this->data[ $k ] ?? null;
 	}
-
-
 	public function getInt(
 		string $k
 	) : int {
@@ -109,6 +91,9 @@ abstract class ActiveRecord {
 	}
 
 
+	// -------------------------------------------------------------------------
+
+
 	public function setData( iterable $data ): void {
 		foreach ( $data as $k => $v ) {
 			$this->data[ $k ] = $v;
@@ -128,16 +113,17 @@ abstract class ActiveRecord {
 	}
 
 
+	// -------------------------------------------------------------------------
 	/**
 	 * @return int|string|null
 	 */
 	public function getPk() {
-		return $this->data[ $this->pk ] ?? null;
+		return $this->data[ $this->definition->getPkColumn() ] ?? null;
 	}
 
 
 	public function setPk( ?string $pk ): void {
-		$this->data[ $this->pk ] = $pk;
+		$this->data[ $this->definition->getPkColumn() ] = $pk;
 	}
 
 
@@ -153,11 +139,14 @@ abstract class ActiveRecord {
 		$query = array_merge(
 			$query,
 			[
-				'FROM'  => $this->table,
+				'FROM'  => $this->definition->getTableName(),
 				'LIMIT' => '1',
 			]
 		);
-		$rows  = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
+		$rows  = $this->definition->getDb()->getRows(
+			SQLBuilder::build( $query, $this->definition->getRelations() ),
+			$bindings,
+		);
 		if ( count( $rows ) === 0 ) {
 			throw new RecordNotFoundException(
 				sprintf( '%s record was not found', get_class( $this ) )
@@ -183,7 +172,7 @@ abstract class ActiveRecord {
 	 * @param int|string $pk
 	 */
 	public function loadByPk( $pk ): array {
-		return $this->loadByColumn( $this->pk, $pk );
+		return $this->loadByColumn( $this->definition->getPkColumn(), $pk );
 	}
 
 
@@ -192,18 +181,18 @@ abstract class ActiveRecord {
 
 	public function save( array $columns = [] ): void {
 		$data = $this->getData( $columns );
-		unset( $data[ $this->pk ] );
+		unset( $data[ $this->definition->getPkColumn() ] );
 		if ( $this->exists() ) {
-			$this->db->update(
-				$this->table,
+			$this->definition->getDb()->update(
+				$this->definition->getTableName(),
 				$data,
-				[ sprintf( '%s = %d', $this->pk, $this->getPk() ) ]
+				[ sprintf( '%s = %d', $this->definition->getPkColumn(), $this->getPk() ) ]
 			);
 
 		} else {
-			$this->db->insert( $this->table, $data );
+			$this->definition->getDb()->insert( $this->definition->getTableName(), $data );
 
-			$insert_id = $this->db->lastInsertId();
+			$insert_id = $this->definition->getDb()->lastInsertId();
 
 			if ( is_string( $insert_id ) ) {
 				$this->setPk( $insert_id );
@@ -213,9 +202,9 @@ abstract class ActiveRecord {
 
 
 	public function delete() : void {
-		$this->db->delete(
-			$this->table,
-			[ 'WHERE' => sprintf( '`%s` = :pk', $this->pk ) ],
+		$this->definition->getDb()->delete(
+			$this->definition->getTableName(),
+			[ 'WHERE' => sprintf( '`%s` = :pk', $this->definition->getPkColumn() ) ],
 			[ ':pk' => $this->getPk() ]
 		);
 	}
@@ -224,21 +213,8 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function getTableName() : string {
-		return $this->table;
-	}
-
-
-	// -------------------------------------------------------------------------
-
-
-	public function setDb( DBAL $db ): void {
-		$this->db = $db;
-	}
-
-
-	public function getDb() : DBAL {
-		return $this->db;
+	public function getDefinition() : ActiveRecordDefinition {
+		return $this->definition;
 	}
 
 }
