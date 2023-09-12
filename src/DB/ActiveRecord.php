@@ -11,25 +11,13 @@ use Exception;
 
 abstract class ActiveRecord {
 
-	protected DBAL $db;
-
-	protected string $table = '';
-	protected string $pk    = 'id';
-
-	protected array $data = [];
-
-
 	public function __construct(
-		?DBAL $db = null,
-		array $data = [],
-	) {
+		protected ActiveRecordDefinition $definition,
+		protected array $data = [],
+	) {}
 
-		if ( $db ) {
-			$this->db = $db;
-		}
 
-		$this->setData( $data );
-	}
+	// -------------------------------------------------------------------------
 
 
 	public function set(
@@ -39,6 +27,9 @@ abstract class ActiveRecord {
 
 		$this->data[ $k ] = $v;
 	}
+
+
+	// -------------------------------------------------------------------------
 
 
 	public function get(
@@ -103,6 +94,9 @@ abstract class ActiveRecord {
 	}
 
 
+	// -------------------------------------------------------------------------
+
+
 	public function setData(
 		iterable $data,
 	) : void {
@@ -131,8 +125,11 @@ abstract class ActiveRecord {
 	}
 
 
+	// -------------------------------------------------------------------------
+
+
 	public function getPk() : int|string|null {
-		return $this->data[ $this->pk ] ?? null;
+		return $this->data[ $this->definition->getPkColumn() ] ?? null;
 	}
 
 
@@ -140,7 +137,7 @@ abstract class ActiveRecord {
 		?string $pk,
 	) : void {
 
-		$this->data[ $this->pk ] = $pk;
+		$this->data[ $this->definition->getPkColumn() ] = $pk;
 	}
 
 
@@ -160,12 +157,15 @@ abstract class ActiveRecord {
 		$query = array_merge(
 			$query,
 			[
-				'FROM'  => $this->table,
+				'FROM'  => $this->definition->getTableName(),
 				'LIMIT' => '1',
 			]
 		);
 
-		$rows = $this->db->getRows( SQLBuilder::build( $query ), $bindings );
+		$rows = $this->definition->getDb()->getRows(
+			SQLBuilder::build( $query, $this->definition->getRelations() ),
+			$bindings,
+		);
 
 		if ( count( $rows ) === 0 ) {
 			throw new RecordNotFoundException(
@@ -195,7 +195,7 @@ abstract class ActiveRecord {
 		int|string $pk,
 	) : array {
 
-		return $this->loadByColumn( $this->pk, $pk );
+		return $this->loadByColumn( $this->definition->getPkColumn(), $pk );
 	}
 
 
@@ -208,19 +208,19 @@ abstract class ActiveRecord {
 
 		$data = $this->getData( $columns );
 
-		unset( $data[ $this->pk ] );
+		unset( $data[ $this->definition->getPkColumn() ] );
 
 		if ( $this->exists() ) {
-			$this->db->update(
-				$this->table,
+			$this->definition->getDb()->update(
+				$this->definition->getTableName(),
 				$data,
-				[ sprintf( '%s = %d', $this->pk, $this->getPk() ) ]
+				[ sprintf( '%s = %d', $this->definition->getPkColumn(), $this->getPk() ) ]
 			);
 
 		} else {
-			$this->db->insert( $this->table, $data );
+			$this->definition->getDb()->insert( $this->definition->getTableName(), $data );
 
-			$insert_id = $this->db->lastInsertId();
+			$insert_id = $this->definition->getDb()->lastInsertId();
 
 			if ( is_string( $insert_id ) ) {
 				$this->setPk( $insert_id );
@@ -230,9 +230,9 @@ abstract class ActiveRecord {
 
 
 	public function delete() : void {
-		$this->db->delete(
-			$this->table,
-			[ 'WHERE' => sprintf( '`%s` = :pk', $this->pk ) ],
+		$this->definition->getDb()->delete(
+			$this->definition->getTableName(),
+			[ 'WHERE' => sprintf( '`%s` = :pk', $this->definition->getPkColumn() ) ],
 			[ ':pk' => $this->getPk() ]
 		);
 	}
@@ -241,24 +241,8 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function getTableName() : string {
-		return $this->table;
-	}
-
-
-	// -------------------------------------------------------------------------
-
-
-	public function setDb(
-		DBAL $db,
-	) : void {
-
-		$this->db = $db;
-	}
-
-
-	public function getDb() : DBAL {
-		return $this->db;
+	public function getDefinition() : ActiveRecordDefinition {
+		return $this->definition;
 	}
 
 }
