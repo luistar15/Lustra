@@ -15,26 +15,20 @@ class ValidatorException extends Exception {
 	public const MISSING_VALUE = 1;
 	public const INVALID_VALUE = 2;
 
-	private array $data = [];
+	/**
+	 * @var mixed[]
+	 */
+	private $data = [];
 
 
-	public static function build(
-		int $code = 0,
-		string $message = '',
-		array $data = [],
-	) : self {
-
+	public static function build( int $code = 0, string $message = '', array $data = [] ): self {
 		$e = new self( $message, $code );
 		$e->setData( $data );
-
 		return $e;
 	}
 
 
-	public function setData(
-		array $data,
-	) : void {
-
+	public function setData( array $data ): void {
 		$this->data = $data;
 	}
 

@@ -11,35 +11,32 @@ use Exception;
 
 abstract class ActiveRecord {
 
-	public function __construct(
-		protected ActiveRecordDefinition $definition,
-		protected array $data = [],
-	) {}
-
-
+	/**
+	 * @var \Lustra\DB\ActiveRecordDefinition
+	 */
+	protected $definition;
+	/**
+	 * @var mixed[]
+	 */
+	protected $data = [];
+	public function __construct( ActiveRecordDefinition $definition, array $data = [] ) {
+		$this->definition = $definition;
+		$this->data       = $data;
+	}
 	// -------------------------------------------------------------------------
-
-
-	public function set(
-		string $k,
-		mixed $v,
-	) : void {
-
+	/**
+	 * @param mixed $v
+	 */
+	public function set( string $k, $v ): void {
 		$this->data[ $k ] = $v;
 	}
-
-
 	// -------------------------------------------------------------------------
-
-
-	public function get(
-		string $k,
-	) : mixed {
-
+	/**
+	 * @return mixed
+	 */
+	public function get( string $k ) {
 		return $this->data[ $k ] ?? null;
 	}
-
-
 	public function getInt(
 		string $k
 	) : int {
@@ -97,46 +94,35 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function setData(
-		iterable $data,
-	) : void {
-
+	public function setData( iterable $data ): void {
 		foreach ( $data as $k => $v ) {
 			$this->data[ $k ] = $v;
 		}
 	}
 
 
-	public function getData(
-		array $columns = [],
-	) : array {
-
+	public function getData( array $columns = [] ): array {
 		if ( count( $columns ) === 0 ) {
 			return $this->data;
 		}
-
 		$data = [];
-
 		foreach ( $columns as $k ) {
 			$data[ $k ] = $this->data[ $k ];
 		}
-
 		return $data;
 	}
 
 
 	// -------------------------------------------------------------------------
-
-
-	public function getPk() : int|string|null {
+	/**
+	 * @return int|string|null
+	 */
+	public function getPk() {
 		return $this->data[ $this->definition->getPkColumn() ] ?? null;
 	}
 
 
-	public function setPk(
-		?string $pk,
-	) : void {
-
+	public function setPk( ?string $pk ): void {
 		$this->data[ $this->definition->getPkColumn() ] = $pk;
 	}
 
@@ -149,11 +135,7 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function load(
-		array $query,
-		array $bindings = [],
-	) : array {
-
+	public function load( array $query, array $bindings = [] ): array {
 		$query = array_merge(
 			$query,
 			[
@@ -161,29 +143,24 @@ abstract class ActiveRecord {
 				'LIMIT' => '1',
 			]
 		);
-
-		$rows = $this->definition->getDb()->getRows(
+		$rows  = $this->definition->getDb()->getRows(
 			SQLBuilder::build( $query, $this->definition->getRelations() ),
 			$bindings,
 		);
-
 		if ( count( $rows ) === 0 ) {
 			throw new RecordNotFoundException(
 				sprintf( '%s record was not found', get_class( $this ) )
 			);
 		}
-
 		$this->data = current( $rows );
-
 		return $this->data;
 	}
 
 
-	public function loadByColumn(
-		string $column,
-		int|string $value,
-	) : array {
-
+	/**
+	 * @param int|string $value
+	 */
+	public function loadByColumn( string $column, $value ): array {
 		return $this->load(
 			[ 'WHERE' => "`{$column}` = :_VAL_" ],
 			[ ':_VAL_' => $value ]
@@ -191,10 +168,10 @@ abstract class ActiveRecord {
 	}
 
 
-	public function loadByPk(
-		int|string $pk,
-	) : array {
-
+	/**
+	 * @param int|string $pk
+	 */
+	public function loadByPk( $pk ): array {
 		return $this->loadByColumn( $this->definition->getPkColumn(), $pk );
 	}
 
@@ -202,14 +179,9 @@ abstract class ActiveRecord {
 	// -------------------------------------------------------------------------
 
 
-	public function save(
-		array $columns = [],
-	) : void {
-
+	public function save( array $columns = [] ): void {
 		$data = $this->getData( $columns );
-
 		unset( $data[ $this->definition->getPkColumn() ] );
-
 		if ( $this->exists() ) {
 			$this->definition->getDb()->update(
 				$this->definition->getTableName(),

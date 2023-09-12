@@ -8,22 +8,32 @@ namespace Lustra\DB;
 
 abstract class ActiveRecordDefinition {
 
-	protected string $table_name;
+	/**
+	 * @var \Lustra\DB\DBAL
+	 */
+	private $db;
+	/**
+	 * @var string
+	 */
+	protected $table_name;
 
-	private string $pk_column = 'id';
+	/**
+	 * @var string
+	 */
+	private $pk_column = 'id';
 
 
 	/** @var string[] */
-	protected array $columns = [];
+	protected $columns = [];
 
 
 	/** @var array<string, string> */
-	protected array $relations = [];
+	protected $relations = [];
 
 
-	public function __construct(
-		private DBAL $db,
-	) {}
+	public function __construct( DBAL $db ) {
+		$this->db = $db;
+	}
 
 
 	public function getDb() : DBAL {

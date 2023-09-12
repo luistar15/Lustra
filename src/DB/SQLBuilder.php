@@ -11,11 +11,7 @@ use Exception;
 
 class SQLBuilder {
 
-	public static function build(
-		array $query,
-		array $relations = [],
-	) : string {
-
+	public static function build( array $query, array $relations = [] ): string {
 		$query = array_merge(
 			[
 				'DISTINCT' => false,
@@ -30,16 +26,13 @@ class SQLBuilder {
 			],
 			$query
 		);
-
 		if ( count( $query['JOIN'] ) > 0 ) {
 			$query['JOIN'] = self::parseJoins(
 				$query['JOIN'],
 				$relations,
 			);
 		}
-
 		$sql = [ 'SELECT' ];
-
 		foreach ( $query as $k => $v ) {
 			if ( is_string( $v ) && ! in_array( $k, [ 'DISTINCT', 'FROM', 'LIMIT' ], true ) ) {
 				$v = [ $v ];
@@ -84,20 +77,13 @@ class SQLBuilder {
 					break;
 			}
 		}
-
 		return rtrim( implode( ' ', $sql ) );
 	}
 
 
-	public static function parseJoins(
-		array $joins,
-		array $relations = [],
-	) : array {
-
+	public static function parseJoins( array $joins, array $relations = [] ): array {
 		$parsed = [];
-
-		$joins = array_unique( $joins );
-
+		$joins  = array_unique( $joins );
 		foreach ( $joins as $join ) {
 			$join = trim( $join );
 
@@ -129,7 +115,6 @@ class SQLBuilder {
 
 			$parsed[] = "{$type} JOIN {$table} ON {$condition}";
 		}
-
 		return $parsed;
 	}
 
